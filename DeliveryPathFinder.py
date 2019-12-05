@@ -46,7 +46,7 @@ def main():
     # With the proper state management there would be no need to iterate the over the full list again.
     packages_by_address = hub.get_packages_by_address(package_list)
     for address in packages_by_address.keys:
-        for package in packages_by_address[address]:
+        for package in packages_by_address.read(address):
             if package.status != 'loaded':
                 if truck_1.load_on_truck(package):
                     return
@@ -58,40 +58,47 @@ def main():
                     print("All trucks are full your hub is overloaded.  Better get that checked out.")
     print('All trucks are loaded')
 
-    current_time = hub.start_time
+    current_time = time()
     current_address = 'hub'
     distance = 0
+    ctime(current_time)
 
-    for package in truck_1.delivery_queue:
-        if package is not None:
-            print("truck 1: ", package)
-
-    for package in truck_2.delivery_queue:
-        if package is not None:
-            print("truck 2: ", package)
-
-    if truck_1.finish_time < truck_2.finish_time:
-        current_time = truck_1.finish_time
-    else:
-        current_time = truck_2.finish_time
-
-    for package in truck_3.delivery_queue:
-        if package is not None:
-            print("truck 3: ", package)
-
-    # Deliver packages based on smallest distance
-    closest_v = int('inf')
-    for v in distance_graph.adjacency_list[distance_graph.hub_vertex]:
-        if v.distance < closest_v:
-            closest_v = v
-
-    packages_by_address = hub.get_packages_by_address(truck_1.delivery_queue)
-    for package in packages_by_address[closest_v.label]:
-
-
-    for v1 in distance_graph.adjacency_list:
-        for v2 in distance_graph.adjacency_list[v1]:
-            print('Path from {0}, to {1}: \n{2}\nDistance = {3}'.format(v1, v2, ShortestPath.get_shortest_path(v1, v2), v2.distance))
+    # for package in truck_1.delivery_queue:
+    #     if package is not None:
+    #         print("truck 1: ", package)
+    #
+    # for package in truck_2.delivery_queue:
+    #     if package is not None:
+    #         print("truck 2: ", package)
+    #
+    # if truck_1.finish_time < truck_2.finish_time:
+    #     current_time = truck_1.finish_time
+    # else:
+    #     current_time = truck_2.finish_time
+    #
+    # for package in truck_3.delivery_queue:
+    #     if package is not None:
+    #         print("truck 3: ", package)
+    #
+    # # Deliver packages based on smallest distance
+    # closest_v = int('inf')
+    # for v in distance_graph.adjacency_list[distance_graph.hub_vertex]:
+    #     if v.distance < closest_v:
+    #         closest_v = v
+    #
+    # packages_by_address = hub.get_packages_by_address(truck_1.delivery_queue)
+    # for package in packages_by_address[closest_v.label]:
+    #     if package is None:
+    #         print('package is None\n')
+    #         break
+    #     else:
+    #         package.delivery_time = time()
+    #         package.delivery_status='delivered'
+    #
+    #
+    # for v1 in distance_graph.adjacency_list:
+    #     for v2 in distance_graph.adjacency_list[v1]:
+    #         print('Path from {0}, to {1}: \n{2}\nDistance = {3}'.format(v1, v2, ShortestPath.get_shortest_path(v1, v2), v2.distance))
 
 
 # TODO: per truck name, driver, Departure, Arrival, print # of miles

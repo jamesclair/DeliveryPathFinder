@@ -10,6 +10,7 @@ class Package:
         self.delivery_zip = delivery_zip
         self.delivery_deadline = delivery_deadline
         self.delivery_state = delivery_state
+        self.delivery_time = ''
         self.delivery_status = 'hub'
         self.truck_id = 0
         self.is_wrong_addr = False
@@ -34,41 +35,45 @@ class Hub:
         self.drivers = ['Bill', 'Ted']
 
     def get_packages_by_status(self, packages):
-        packages_by_status = PackagePropertyTable(3)
+        packages_by_status = {}
         for package in packages:
-            packages_by_status.create(package.delivery_status, package)
+            if package is not None:
+                packages_by_status[package.delivery_status].append(package)
         return packages_by_status
 
     def get_packages_by_address(self, packages):
-        packages_by_address = PackagePropertyTable(27)
+        packages_by_address = {}
         for package in packages:
-            packages_by_address.create(package.delivery_address, package)
+            if package is not None:
+                packages_by_address[package.delivery_address].append(package)
         return packages_by_address
 
     def get_packages_by_deadline(self, packages):
         packages_by_deadline = PackagePropertyTable(40)
         for package in packages:
-            packages_by_deadline.create(package.delivery_deadline, package)
+            if package is not None:
+                packages_by_deadline.create(package.delivery_deadline, package)
         return packages_by_deadline
 
     def get_packages_by_city(self, packages):
-        packages_by_city = PackagePropertyTable(40)
+        packages_by_city = {}
         for package in packages:
-            packages_by_city.create(package.delivery_city, package)
+            if package is not None:
+                packages_by_city[package.delivery_city].append(package)
         return packages_by_city
 
     def get_packages_by_zip(self, packages):
         packages_by_zip = PackagePropertyTable(40)
         for package in packages:
             if package is not None:
-                print(package)
                 packages_by_zip.create(package.delivery_zip, package)
         return packages_by_zip
 
     def get_packages_by_weight(self, packages):
         packages_by_weight = PackagePropertyTable(40)
         for package in packages:
-            packages_by_weight.create(package.delivery_weight, package)
+            if package is not None:
+                packages_by_weight.create(package.delivery_weight, package)
         return packages_by_weight
 
 
