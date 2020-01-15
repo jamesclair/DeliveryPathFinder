@@ -42,12 +42,23 @@ with open('Distances.csv', mode='r') as distances:
                 if row[path] == '0.0':
                     break
                 else:
+                    # print("v.label: ", location.label)
+                    # print("v.distance: ", location.distance)
+                    # print("v.predecessor: ", location.predecessor)
+                    # v = list(distance_graph.adjacency_list.keys())[path - 2]
+                    # print("secondV_label: ", v.label)
+                    # print("secondV_distance: ", v.distance)
+                    # print("secondV_predecessor: ", v.predecessor)
+                    # print("weight: ", str(float(row[path])))
                     distance_graph.add_undirected_edge(location
                                                        , list(distance_graph.adjacency_list.keys())[path - 2]
                                                        , float(row[path]))
 
         count += 1
-
+    # for v in distance_graph.adjacency_list:
+    #     print("v.label: ", v.label)
+    #     print("v.distance: ", v.distance)
+    #     print("v.predecessor: ", v.predecessor)
 
 def load_packages():
     return package_list
