@@ -6,8 +6,7 @@ class Package:
         self.package_weight = package_weight
         self.special_note = special_note
         self.delivery_address = delivery_address
-        self.city = delivery_city
-        self.delivery_city = self.city
+        self.delivery_city = delivery_city
         self.delivery_zip = delivery_zip
         self.delivery_deadline = delivery_deadline
         self.delivery_state = delivery_state
@@ -16,16 +15,17 @@ class Package:
         self.truck_id = 0
         self.is_wrong_addr = False
         self.peer_packages = []
-        self.miles = 0
+        self.arrival_time = 0
 
     def __str__(self):
-        return ('package_id: ' + self.package_id.__str__()
-                + '\npackage_weight: ' + self.package_weight.__str__()
-                + '\nspecial_note: ' + self.special_note
-                + '\ndelivery_address: ' + self.delivery_address
-                + '\ndelivery_city: ' + self.delivery_city
-                + '\ndelivery_zip: ' + self.delivery_zip
-                + '\ndelivery_deadline: ' + self.delivery_deadline.__str__()
+        return ('Package Id: ' + self.package_id.__str__()
+                + '\nStatus: ' + self.delivery_status.__str__()
+                + '\nSpecial Note: ' + self.special_note.__str__()
+                + '\nDelivery Address: ' + self.delivery_address.__str__() + ', ' + self.delivery_city.__str__() + ', '
+                                         + self.delivery_state.__str__() + ', ' + self.delivery_zip.__str__()
+                + '\nDelivery Deadline: ' + self.delivery_deadline.__str__()
+                + '\nTime since last delivery: ' + self.delivery_time.__str__()
+                + '\nArrival Time: ' + self.arrival_time.__str__()
                 + '\n\n'
                 )
 
@@ -35,12 +35,18 @@ class Hub:
         self.package_list = [None] * capacity
         self.start_time = 8
         self.drivers = ['Bill', 'Ted']
+        self.finish_time = 0
+        self.count = 0
 
     def get_packages_by_status(self, packages):
         packages_by_status = {}
         for package in packages:
             if package is not None:
-                packages_by_status[package.delivery_status].append(package)
+                if package.delivery_status in packages_by_status:
+                    packages_by_status[package.delivery_status].append(package)
+                else:
+                    packages_by_status[package.delivery_status] = []
+                    packages_by_status[package.delivery_status].append(package)
         return packages_by_status
 
     def get_packages_by_address(self, packages):
@@ -92,20 +98,24 @@ class Truck:
     def __init__(self, truck_id, driver=""):
         self.MAX_LOAD = 16
         self.AVG_MPH = 18
-        self.DELIVERY_TIME = 0
         self.driver = driver
-        self.delivery_queue = [None] * self.MAX_LOAD
+        self.delivery_queue = []
         self.truck_id = truck_id
         self.package_count = 0
         self.distance = 0
         self.finish_time = 0
+        self.start_time = 0
 
     # TODO: Add 1 driver to two trucks and 1 driver to the other truck
     def __str__(self):
-        return ('MAX_LOAD: ' + self.MAX_LOAD.__str__()
+        return ('Truck ID: ' + self.truck_id.__str__()
+                + '\nStart Time: ' + self.start_time.__str__()
+                + '\nDistance: ' + self.distance.__str__()
+                + '\nPackage Count: ' + self.package_count.__str__()
+                + '\nFinish Time: ' + self.finish_time.__str__()
+                + '\nMAX_LOAD: ' + self.MAX_LOAD.__str__()
                 + '\nAVG_MPH: ' + self.AVG_MPH.__str__()
-                + '\ndriver: ' + self.driver.__str__()
-                + '\nDELIVERY_TIME_SECONDS: ' + self.DELIVERY_TIME.__str__()
+                + '\nDriver: ' + self.driver.__str__()
                 + '\n\n'
                 )
 

@@ -60,6 +60,7 @@ with open('Distances.csv', mode='r') as distances:
     #     print("v.distance: ", v.distance)
     #     print("v.predecessor: ", v.predecessor)
 
+
 def load_packages():
     return package_list
 
