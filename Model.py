@@ -19,6 +19,7 @@ class Package:
 
     def __str__(self):
         return ('Package Id: ' + self.package_id.__str__()
+                + '\nTruck ID: ' + self.truck_id.__str__()
                 + '\nStatus: ' + self.delivery_status.__str__()
                 + '\nSpecial Note: ' + self.special_note.__str__()
                 + '\nDelivery Address: ' + self.delivery_address.__str__() + ', ' + self.delivery_city.__str__() + ', '
