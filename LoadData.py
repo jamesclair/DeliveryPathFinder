@@ -34,9 +34,12 @@ with open('Distances.csv', mode='r') as distances:
             location = Model.Location(address)
 
             if location.label == "":
-                location.label = "HUB"
+                location.label = 'hub'
                 distance_graph.hub_vertex = location
             distance_graph.add_vertex(location)
+            for package in package_list:
+                if package.delivery_address == location.label:
+                    package.location = location
 
             for path in range(2, len(row)):
                 if row[path] == '0.0':

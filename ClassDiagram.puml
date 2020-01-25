@@ -1,0 +1,121 @@
+@startuml
+
+
+abstract Inventory{
+    get_packages()
+    get_location_data()
+}
+
+namespace WGUPS{
+class Hub{
+    packages
+    start_time
+    finish_time
+    drivers
+    total_distance
+    location
+    decimal_to_time()
+    time_to_decimal()
+    check_status()
+    get_packages_by_weight(packages)
+    get_packages_by_zip(packages)
+    get_packages_by_city(packages)
+    get_packages_by_deadline(packages)
+    get_packages_by_address(packages)
+    get_packages_by_status(packages)
+    __str__()
+}
+
+class Truck{
+   id
+   start_time
+   finish_time
+   driver
+   MPH
+   CAPACITY
+   odometer
+   package_queue
+   load()
+   deliver()
+   __str__()
+}
+
+class Package{
+    id
+    status
+    arrival
+    location
+    deadline
+    special_note
+    address
+    city
+    zip
+    state
+    weight
+    peers
+    __str__()
+}
+
+
+
+class PackagePropertyTable{
+    table
+    keys
+    create(key, value)
+    read(key)
+    delete(key)
+}
+}
+
+
+namespace Map{
+class Location{
+    label
+    distance
+    predecessor
+    __str__()
+}
+
+class DistanceGraph{
+    adjacency_list
+    edge_weights
+    add_vertex(location)
+    add_directed_edge(from_location, to_location, weight)
+    add_undirected_edge(location_a, location_b, weight)
+    __str__()
+}
+
+}
+
+
+
+
+
+'note "this is a" as N1
+'
+'Hub .. N1
+'N1 .. DeliveryPathFinder
+
+'abstract AbstractCollection
+'interface List
+'interface Collection
+
+'List <|-- AbstractList
+'Collection <|-- AbstractCollection
+'
+'Collection <|- List
+'AbstractCollection <|- AbstractList
+'AbstractList <|-- ArrayList
+'
+'class ArrayList {
+'Object[] elementData
+'size()
+'}
+'
+'enum TimeUnit {
+'DAYS
+'HOURS
+'MINUTES
+'}
+
+@enduml

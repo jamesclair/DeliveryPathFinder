@@ -47,17 +47,18 @@ def get_shortest_path(start_location, end_location):
     # print("start_location_label: ", start_location.label)
     # print("----Starting while loop----")
     while current_location is not start_location:
-        # if current_location.predecessor is None:
-        #     break
+        if current_location.predecessor is None:
+            break
         # print("current_location_type: ", type(current_location))
         # print("current_location_label: ", current_location.label)
         # print("start_location_type: ", type(start_location))
         # print("start_location_label: ", start_location.label)
         # print("current_location_predecessor: ", current_location.predecessor)
         # print("current_location_predecessor_type: ", type(current_location.predecessor))
-        path.insert(0, current_location.label)
+        # print(current_location.label)
+        path.insert(0, current_location)
         # path = " -> " + str(current_location.label) + path
         current_location = current_location.predecessor
-    path.insert(0, start_location.label)
+    path.insert(0, start_location)
     # path = start_location.label + path
     return path
