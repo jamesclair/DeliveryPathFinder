@@ -108,6 +108,7 @@ class Truck:
         self.distance = 0
         self.finish_time = 0
         self.start_time = 0
+        self.paths = []
 
     # TODO: Add 1 driver to two trucks and 1 driver to the other truck
     def __str__(self):
