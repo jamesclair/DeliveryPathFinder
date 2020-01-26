@@ -39,6 +39,7 @@ class Hub:
         self.drivers = ['Bill', 'Ted']
         self.finish_time = 0
         self.count = 0
+        self.total_distance = 0
 
     def get_packages_by_status(self, packages):
         packages_by_status = {}

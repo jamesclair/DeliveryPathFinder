@@ -24,6 +24,18 @@ def get_hours_float(time):
     return float(time.hour + time.minute / 60 + time.second / 3600)
 
 
+def find_closest_location(delivery_queue):
+    closest_distance = float('inf')
+    smallest = 0
+    for i in range(0, len(delivery_queue) - 1):
+        if delivery_queue[i].location.distance < closest_distance:
+            smallest = i
+    if len(delivery_queue) != 0:
+        return delivery_queue[smallest].location
+    else:
+        return None
+
+
 # def check_status(current_time, package_list, hub):
 #     packages_by_status = hub.get_packages_by_status(package_list)
 #     if ((get_hours_float('8:35:00') <= current_time <= get_hours_float('9:25:00') and hub.count == 0) or (
@@ -33,22 +45,25 @@ def get_hours_float(time):
 #         hub.count = hub.count + 1
 
 
+def deliver_package(package, time):
+    package.arrival_time = time
+    package.delivery_status = 'delivered'
+    print()
+
+
 def main():
     package_list = LoadData.load_packages()
     distance_graph = LoadData.load_distances()
-
-    ShortestPath.dijkstra_shortest_path(distance_graph, distance_graph.hub_vertex)
 
     hub = Model.Hub()
     truck_1 = Model.Truck(1, hub.drivers[0])
     truck_2 = Model.Truck(2, hub.drivers[1])
     truck_3 = Model.Truck(3)  # Driver assigned once first truck returns.
+    trucks = [truck_1, truck_2, truck_3]
 
     # Load packages with special notes
     original_list = package_list.copy()
     for package in original_list:
-        print(package)
-        print('length of orig list: ', len(original_list))
         # Sort packages with special notes
         if package.special_note != "":
             package.delivery_status = 'loaded'
@@ -80,23 +95,75 @@ def main():
                     if p2.package_id in package.peer_packages and p2.delivery_status != 'loaded':
                         if truck_1.load_on_truck(p2):
                             package_list.remove(p2)
-    #
 
-    # def sort
+    # find shortest path to hub
+    for package in package_list:
+        if truck_1.load_on_truck(package):
+            continue
+        elif truck_2.load_on_truck(package):
+            continue
+        elif truck_3.load_on_truck(package):
+            continue
+        else:
+            print('Unable to load package on truck')
 
-    for truck in [truck_1, truck_2, truck_3]:
-        if len(truck.delivery_queue) > 0:
-            for package in truck.delivery_queue:
-                shortest_v = Model.Location('shortest')
-                if package.delivery_address in distance_graph.adjacency_list:
-                    for v in distance_graph.adjacency_list[package.delivery_address]:
-                        if v.distance < shortest_v.distance:
-                            shortest_v = v
-                sorted_packages_by_address = hub.get_packages_by_address(package_list)
-                if shortest_v.label in sorted_packages_by_address:
-                    for peer_package in sorted_packages_by_address[shortest_v.label]:
-                        if truck.load_on_truck(peer_package):
-                            package_list.remove(peer_package)
+    for truck in trucks:
+        print('#' * 118)
+        print('# Truck {0}:'.format(truck.truck_id))
+        print('# Truck {0} delivery queue length: {1}'.format(truck.truck_id, len(truck.delivery_queue)))
+        print('#' * 118)
+        for package in truck.delivery_queue:
+            print(package)
+
+    # Deliver packages
+    ShortestPath.dijkstra_shortest_path(distance_graph, distance_graph.hub_vertex)
+    for truck in trucks:
+        # set the current time
+        truck.start_time = hub.start_time
+        if truck.truck_id == 3:
+            truck.start_time = min(truck_1.start_time, truck_2.start_time)
+        current_time = truck.start_time
+
+        # first location
+        next_location = find_closest_location(truck.delivery_queue)
+
+        # Deliveries
+        count = 0
+        while len(truck.delivery_queue) > 0:
+            print(len(truck.delivery_queue))
+            # Deliver packages for location
+            hub.total_distance += next_location.distance
+            truck.distance += next_location.distance
+            current_time += (next_location.distance / 18)
+            packages_by_address = hub.get_packages_by_address(truck.delivery_queue)
+            for package in packages_by_address[next_location.label]:
+                deliver_package(package, current_time)
+                truck.delivery_queue.remove(package)
+
+            # Run dijkstras
+            print("I'm running")
+            ShortestPath.dijkstra_shortest_path(distance_graph, next_location)
+
+            # Update next location
+            next_location = find_closest_location(truck.delivery_queue)
+            count += 1
+    print('Total distance of all trucks: {0:.2f}'.format(hub.total_distance))
+    print('All packages delivered at: {0}'.format(get_formatted_time(hub.finish_time)))
+
+
+    # for truck in [truck_1, truck_2, truck_3]:
+    #     if len(truck.delivery_queue) > 0:
+    #         for package in truck.delivery_queue:
+    #             shortest_v = Model.Location('shortest')
+    #             if package.delivery_address in distance_graph.adjacency_list:
+    #                 for v in distance_graph.adjacency_list[package.delivery_address]:
+    #                     if v.distance < shortest_v.distance:
+    #                         shortest_v = v
+    #             sorted_packages_by_address = hub.get_packages_by_address(package_list)
+    #             if shortest_v.label in sorted_packages_by_address:
+    #                 for peer_package in sorted_packages_by_address[shortest_v.label]:
+    #                     if truck.load_on_truck(peer_package):
+    #                         package_list.remove(peer_package)
     #
     # closest_v = distance_graph.hub_vertex
     # visited = [closest_v]
@@ -135,12 +202,7 @@ def main():
     # for package in package_list:
     #     print(package)
     # for truck in [truck_1, truck_2, truck_3]:
-    #     print('#' * 118)
-    #     print('# Truck {0}:'.format(truck.truck_id))
-    #     print('# Truck {0} delivery queue length: {1}'.format(truck.truck_id, len(truck.delivery_queue)))
-    #     print('#' * 118)
-    #     for package in truck.delivery_queue:
-    #         print(package)
+
     #
     # total_distance = 0
     # start_v = distance_graph.hub_vertex
@@ -207,74 +269,74 @@ def main():
     #             if package is not None:
     #                 print(package)
 
-    start_v = distance_graph.hub_vertex
-    smallest_v = Model.Location('smallest')
-    smallest_v.distance = float('inf')
-    visited = []
-    while len(package_list) > 0:
-        ShortestPath.dijkstra_shortest_path(distance_graph, start_v)
-        packages_by_address = hub.get_packages_by_address(package_list)
-        for v in distance_graph.adjacency_list[start_v]:
-            if v.distance < smallest_v.distance and v not in visited:
-                smallest_v = v
-        for packages in packages_by_address[smallest_v.label]:
-            Model.Truck.deliver(package)
-            package_list.remove(package)
-        start_v = smallest_v
-
-    for v in distance_graph.adjacency_list:
-        vertices = distance_graph.adjacency_list[v]
-        for i in range(1, len(vertices)):
-            j = i
-
-            while j > 0 and vertices[j].distance < vertices[j - 1].distance:
-                temp = vertices[j]
-                vertices[j] = vertices[j - 1]
-                vertices[j - 1] = temp
-                j -= 1
-
-    current_time = hub.start_time
-    total_distance = 0
-    for truck in [truck_1, truck_2, truck_3]:
-        packages_by_address = hub.get_packages_by_address(truck.delivery_queue)
-        start_v = distance_graph.hub_vertex
-        start_v.index = 0
-        last_v = Model.Location('last_v')
-        while len(truck.delivery_queue) > 0:
-            end_v = distance_graph.adjacency_list[start_v][start_v.index]
-            if end_v == last_v and end_v.label not in packages_by_address:
-                start_v.index += 1
-                continue
-            else:
-                path = ShortestPath.get_shortest_path(start_v, end_v)
-                delivery_time = (end_v.distance / 18)
-                current_time = (current_time + delivery_time)
-                truck.distance = truck.distance + end_v.distance
-                total_distance = total_distance + end_v.distance
-                print('The following packages took {0} to deliver and arrived at {1}: \n'.format(
-                    get_formatted_time(delivery_time), get_formatted_time(current_time)))
-                for v in path[1:]:
-                    if v.label is not 'hub' and v.label in packages_by_address:
-                        for package in packages_by_address[v.label]:
-                            package.delivery_status = "delivered"
-                            package.delivery_time = delivery_time
-                            package.arrival_time = current_time
-                            print(package)
-                            # Deliver package
-                            # remove package from list
-                            if package in truck.delivery_queue:
-                                truck.delivery_queue.remove(package)
-
-            start_v.index += 1
-            start_v = end_v
-            last_v = end_v
-        truck.finish_time = current_time
-
-    for truck in [truck_1, truck_2, truck_3]:
-        if truck.finish_time > hub.finish_time:
-            hub.finish_time = truck.finish_time
-    print('Total distance of all trucks: {0:.2f}'.format(total_distance))
-    print('All packages delivered at: {0}'.format(get_formatted_time(hub.finish_time)))
+    # start_v = distance_graph.hub_vertex
+    # smallest_v = Model.Location('smallest')
+    # smallest_v.distance = float('inf')
+    # visited = []
+    # while len(package_list) > 0:
+    #     ShortestPath.dijkstra_shortest_path(distance_graph, start_v)
+    #     packages_by_address = hub.get_packages_by_address(package_list)
+    #     for v in distance_graph.adjacency_list[start_v]:
+    #         if v.distance < smallest_v.distance and v not in visited:
+    #             smallest_v = v
+    #     for packages in packages_by_address[smallest_v.label]:
+    #         Model.Truck.deliver(package)
+    #         package_list.remove(package)
+    #     start_v = smallest_v
+    #
+    # for v in distance_graph.adjacency_list:
+    #     vertices = distance_graph.adjacency_list[v]
+    #     for i in range(1, len(vertices)):
+    #         j = i
+    #
+    #         while j > 0 and vertices[j].distance < vertices[j - 1].distance:
+    #             temp = vertices[j]
+    #             vertices[j] = vertices[j - 1]
+    #             vertices[j - 1] = temp
+    #             j -= 1
+    #
+    # current_time = hub.start_time
+    # total_distance = 0
+    # for truck in [truck_1, truck_2, truck_3]:
+    #     packages_by_address = hub.get_packages_by_address(truck.delivery_queue)
+    #     start_v = distance_graph.hub_vertex
+    #     start_v.index = 0
+    #     last_v = Model.Location('last_v')
+    #     while len(truck.delivery_queue) > 0:
+    #         end_v = distance_graph.adjacency_list[start_v][start_v.index]
+    #         if end_v == last_v and end_v.label not in packages_by_address:
+    #             start_v.index += 1
+    #             continue
+    #         else:
+    #             path = ShortestPath.get_shortest_path(start_v, end_v)
+    #             delivery_time = (end_v.distance / 18)
+    #             current_time = (current_time + delivery_time)
+    #             truck.distance = truck.distance + end_v.distance
+    #             total_distance = total_distance + end_v.distance
+    #             print('The following packages took {0} to deliver and arrived at {1}: \n'.format(
+    #                 get_formatted_time(delivery_time), get_formatted_time(current_time)))
+    #             for v in path[1:]:
+    #                 if v.label is not 'hub' and v.label in packages_by_address:
+    #                     for package in packages_by_address[v.label]:
+    #                         package.delivery_status = "delivered"
+    #                         package.delivery_time = delivery_time
+    #                         package.arrival_time = current_time
+    #                         print(package)
+    #                         # Deliver package
+    #                         # remove package from list
+    #                         if package in truck.delivery_queue:
+    #                             truck.delivery_queue.remove(package)
+    #
+    #         start_v.index += 1
+    #         start_v = end_v
+    #         last_v = end_v
+    #     truck.finish_time = current_time
+    #
+    # for truck in [truck_1, truck_2, truck_3]:
+    #     if truck.finish_time > hub.finish_time:
+    #         hub.finish_time = truck.finish_time
+    # print('Total distance of all trucks: {0:.2f}'.format(total_distance))
+    # print('All packages delivered at: {0}'.format(get_formatted_time(hub.finish_time)))
 
 
 # BubbleSort(numbers, numbersSize) {
