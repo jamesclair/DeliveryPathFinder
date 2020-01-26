@@ -30,8 +30,9 @@ def find_closest_location(delivery_queue):
     for i in range(0, len(delivery_queue) - 1):
         print('location:', delivery_queue[i].location.label)
         print('distance:', delivery_queue[i].location.distance)
-        if delivery_queue[i].location.distance < closest_distance and delivery_queue[i].location.distance is not 0:
+        if delivery_queue[i].location.distance < closest_distance:
             smallest = i
+            closest_distance = delivery_queue[i].location.distance
     if smallest is not None:
         return delivery_queue[smallest].location
     else:
@@ -97,16 +98,58 @@ def main():
                         if truck_1.load_on_truck(p2):
                             package_list.remove(p2)
 
-    # find shortest path to hub
+    truck_1_packages_by_address = hub.get_packages_by_address(truck_1.delivery_queue)
+    truck_2_packages_by_address = hub.get_packages_by_address(truck_2.delivery_queue)
+    truck_3_packages_by_address = hub.get_packages_by_address(truck_3.delivery_queue)
+    truck_1_packages_by_zip = hub.get_packages_by_zip(truck_1.delivery_queue)
+    truck_2_packages_by_zip = hub.get_packages_by_zip(truck_2.delivery_queue)
+    truck_3_packages_by_zip = hub.get_packages_by_zip(truck_3.delivery_queue)
+    truck_1_packages_by_city = hub.get_packages_by_city(truck_1.delivery_queue)
+    truck_2_packages_by_city = hub.get_packages_by_city(truck_2.delivery_queue)
+    truck_3_packages_by_city = hub.get_packages_by_city(truck_3.delivery_queue)
+
+
+    test = list(truck_1_packages_by_zip.keys())
+    for zip in test:
+        print(zip)
+
     for package in package_list:
-        if truck_1.load_on_truck(package):
-            continue
-        elif truck_2.load_on_truck(package):
-            continue
-        elif truck_3.load_on_truck(package):
-            continue
+        if package.delivery_address in truck_1_packages_by_address:
+            if truck_1.load_on_truck(package):
+                continue
+        elif package.delivery_address in truck_2_packages_by_address:
+            if truck_2.load_on_truck(package):
+                continue
+        elif package.delivery_address in truck_3_packages_by_address:
+            if truck_3.load_on_truck(package):
+                continue
+        elif package.delivery_zip in truck_1_packages_by_zip:
+            if truck_1.load_on_truck(package):
+                continue
+        elif package.delivery_zip in truck_2_packages_by_zip:
+            if truck_2.load_on_truck(package):
+                continue
+        elif package.delivery_zip in truck_3_packages_by_zip:
+            if truck_3.load_on_truck(package):
+                continue
+        elif package.delivery_city in truck_1_packages_by_city:
+            if truck_1.load_on_truck(package):
+                continue
+        elif package.delivery_city in truck_2_packages_by_city:
+            if truck_2.load_on_truck(package):
+                continue
+        elif package.delivery_city in truck_3_packages_by_city:
+            if truck_3.load_on_truck(package):
+                continue
         else:
-            print('Unable to load package on truck')
+            if truck_1.load_on_truck(package):
+                continue
+            elif truck_2.load_on_truck(package):
+                continue
+            elif truck_3.load_on_truck(package):
+                continue
+            else:
+                print('Unable to load package on truck')
 
     for truck in trucks:
         print('#' * 118)
@@ -123,7 +166,7 @@ def main():
         ShortestPath.dijkstra_shortest_path(distance_graph, last_location)
         truck.start_time = hub.start_time
         if truck.truck_id == 3:
-            truck.start_time = min(truck_1.start_time, truck_2.start_time)
+            truck.start_time = min(truck_1.finish_time, truck_2.finish_time)
         print('# Truck {0} start: {1}'.format(truck.truck_id, truck.start_time))
         current_time = truck.start_time
 
@@ -152,6 +195,7 @@ def main():
                 deliver_package(package, current_time)
                 truck.delivery_queue.remove(package)
                 print(package)
+                count += 1
 
             # Update truck's path
             # print('last_location:', last_location.label)
@@ -161,8 +205,8 @@ def main():
 
             last_location = current_location
             # Run dijkstras
-            print(last_location.distance)
-            # TODO: Figure out why vertices are setting their distance to 0 and if you need to set their distances to float('inf') before running dijkstras
+            for v in distance_graph.adjacency_list:
+                v.distance = float('inf')
             ShortestPath.dijkstra_shortest_path(distance_graph, current_location)
 
             # Update next location
@@ -172,11 +216,12 @@ def main():
         ShortestPath.dijkstra_shortest_path(distance_graph, last_location)
         truck.distance += distance_graph.hub_vertex.distance
         hub.total_distance += distance_graph.hub_vertex.distance
-        print('truck.distance: ', truck.distance)
         truck.finish_time = (truck.distance / 18)
-        print('truck.finish_time: ', truck.finish_time)
+        truck.packages_delivered = count
+        print(truck)
 
     hub.finish_time = max(truck_1.finish_time, truck_2.finish_time, truck_3.finish_time)
+    hub.packages_delivered = truck_1.packages_delivered + truck_2.packages_delivered + truck_3.packages_delivered
 
     for truck in trucks:
         print('Truck {0} path:')

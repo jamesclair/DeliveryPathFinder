@@ -40,6 +40,7 @@ class Hub:
         self.finish_time = 0
         self.count = 0
         self.total_distance = 0
+        self.packages_delivered = 0
 
     def get_packages_by_status(self, packages):
         packages_by_status = {}
@@ -74,14 +75,22 @@ class Hub:
         packages_by_city = {}
         for package in packages:
             if package is not None:
-                packages_by_city[package.delivery_city].append(package)
+                if package.delivery_city in packages_by_city:
+                    packages_by_city[package.delivery_city].append(package)
+                else:
+                    packages_by_city[package.delivery_city] = []
+                    packages_by_city[package.delivery_city].append(package)
         return packages_by_city
 
     def get_packages_by_zip(self, packages):
-        packages_by_zip = PackagePropertyTable(40)
+        packages_by_zip = {}
         for package in packages:
             if package is not None:
-                packages_by_zip.create(package.delivery_zip, package)
+                if package.delivery_zip in packages_by_zip:
+                    packages_by_zip[package.delivery_zip].append(package)
+                else:
+                    packages_by_zip[package.delivery_zip] = []
+                    packages_by_zip[package.delivery_zip].append(package)
         return packages_by_zip
 
     def get_packages_by_weight(self, packages):
@@ -104,6 +113,7 @@ class Truck:
         self.driver = driver
         self.delivery_queue = []
         self.truck_id = truck_id
+        self.packages_delivered = 0
         self.package_count = 0
         self.distance = 0
         self.finish_time = 0
