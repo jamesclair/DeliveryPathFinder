@@ -37,28 +37,40 @@ def dijkstra_shortest_path(graph, start_location):
                 # print("did not update adj vertex distance")
 
 
+# def get_shortest_path(start_location, end_location):
+#     # Start from end_vertex and build the path backwards.
+#     path = []
+#     current_location = end_location
+#     # print("current_location_type: ", type(current_location))
+#     # print("current_location_label: ", current_location.label)
+#     # print("start_location_type: ", type(start_location))
+#     # print("start_location_label: ", start_location.label)
+#     # print("----Starting while loop----")
+#     while current_location is not start_location:
+#         if current_location.predecessor is None:
+#             break
+#         # print("current_location_type: ", type(current_location))
+#         # print("current_location_label: ", current_location.label)
+#         # print("start_location_type: ", type(start_location))
+#         # print("start_location_label: ", start_location.label)
+#         # print("current_location_predecessor: ", current_location.predecessor)
+#         # print("current_location_predecessor_type: ", type(current_location.predecessor))
+#         # print(current_location.label)
+#         path.insert(0, current_location)
+#         path = " -> " + str(current_location.label) + path
+#         current_location = current_location.predecessor
+#     path.insert(0, start_location)
+#     path = start_location.label + path
+#     return path
+
 def get_shortest_path(start_location, end_location):
     # Start from end_vertex and build the path backwards.
-    path = []
+    path = ''
     current_location = end_location
-    # print("current_location_type: ", type(current_location))
-    # print("current_location_label: ", current_location.label)
-    # print("start_location_type: ", type(start_location))
-    # print("start_location_label: ", start_location.label)
-    # print("----Starting while loop----")
-    while current_location is not start_location:
-        if current_location.predecessor is None:
-            break
-        # print("current_location_type: ", type(current_location))
-        # print("current_location_label: ", current_location.label)
-        # print("start_location_type: ", type(start_location))
-        # print("start_location_label: ", start_location.label)
-        # print("current_location_predecessor: ", current_location.predecessor)
-        # print("current_location_predecessor_type: ", type(current_location.predecessor))
-        # print(current_location.label)
-        path.insert(0, current_location)
-        path = " -> " + str(current_location.label) + path
-        current_location = current_location.predecessor
-    path.insert(0, start_location)
-    path = start_location.label + path
+    if current_location is not None:
+        while current_location is not start_location and current_location is not None:
+            print(current_location.label, current_location.predecessor, current_location.distance)
+            path = " -> " + str(current_location.label) + path
+            current_location = current_location.predecessor
+        path = start_location.label + path
     return path

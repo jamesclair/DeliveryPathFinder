@@ -17,6 +17,8 @@ class Package:
         self.peer_packages = []
         self.arrival_time = 0
         self.location = Location(None)
+        self.delayed = False
+        self.required_truck = 0
 
     def __str__(self):
         return ('Package Id: ' + self.package_id.__str__()
@@ -28,6 +30,7 @@ class Package:
                 + '\nDelivery Deadline: ' + self.delivery_deadline.__str__()
                 + '\nTime since last delivery: ' + self.delivery_time.__str__()
                 + '\nArrival Time: ' + self.arrival_time.__str__()
+                + '\nPeer Packages: ' + self.peer_packages.__str__()
                 + '\n\n'
                 )
 
@@ -65,11 +68,16 @@ class Hub:
         return packages_by_address
 
     def get_packages_by_deadline(self, packages):
-        packages_by_deadline = PackagePropertyTable(40)
+        packages_by_deadline = {}
         for package in packages:
             if package is not None:
-                packages_by_deadline.create(package.delivery_deadline, package)
+                if package.delivery_deadline in packages_by_deadline:
+                    packages_by_deadline[package.delivery_deadline].append(package)
+                else:
+                    packages_by_deadline[package.delivery_deadline] = []
+                    packages_by_deadline[package.delivery_deadline].append(package)
         return packages_by_deadline
+
 
     def get_packages_by_city(self, packages):
         packages_by_city = {}
@@ -99,6 +107,28 @@ class Hub:
             if package is not None:
                 packages_by_weight.create(package.delivery_weight, package)
         return packages_by_weight
+
+    def get_packages_by_delayed(self, packages):
+        packages_by_delayed = {}
+        for package in packages:
+            if package is not None:
+                if package.delivery_zip in packages_by_delayed:
+                    packages_by_delayed[package.delivery_zip].append(package)
+                else:
+                    packages_by_delayed[package.delayed] = []
+                    packages_by_delayed[package.delayed].append(package)
+        return packages_by_delayed
+
+    def get_packages_by_required_truck(self, packages):
+        packages_by_required_truck = {}
+        for package in packages:
+            if package is not None:
+                if package.delivery_zip in packages_by_required_truck:
+                    packages_by_required_truck[package.required_truck].append(package)
+                else:
+                    packages_by_required_truck[package.required_truck] = []
+                    packages_by_required_truck[package.required_truck].append(package)
+        return packages_by_required_truck
 
     # def get_packages_by_distance(self, packages):
     #     for package in packages:
