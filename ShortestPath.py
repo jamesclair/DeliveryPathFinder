@@ -67,10 +67,11 @@ def get_shortest_path(start_location, end_location):
     # Start from end_vertex and build the path backwards.
     path = ''
     current_location = end_location
-    if current_location is not None:
-        while current_location is not start_location and current_location is not None:
-            print(current_location.label, current_location.predecessor, current_location.distance)
-            path = " -> " + str(current_location.label) + path
-            current_location = current_location.predecessor
-        path = start_location.label + path
+    while current_location is not start_location:
+        if current_location is None:
+            break
+        print(current_location.label, current_location.predecessor, current_location.distance)
+        path = " -> " + str(current_location.label) + path
+        current_location = current_location.predecessor
+    path = start_location.label + path
     return path
