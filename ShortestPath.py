@@ -34,7 +34,7 @@ def dijkstra_shortest_path(graph, start_location):
                 adj_vertex.distance = alternative_path_distance
                 adj_vertex.predecessor = current_location
             # else:
-                # print("did not update adj vertex distance")
+            # print("did not update adj vertex distance")
 
 
 # def get_shortest_path(start_location, end_location):

@@ -28,8 +28,8 @@ def find_closest_location(delivery_queue):
     closest_distance = float('inf')
     smallest = None
     for i in range(0, len(delivery_queue)):
-        # print('location:', delivery_queue[i].location.label)
-        # print('distance:', delivery_queue[i].location.distance)
+        print('location:', delivery_queue[i].location.label)
+        print('distance:', delivery_queue[i].location.distance)
         if delivery_queue[i].location.distance < closest_distance:
             smallest = i
             closest_distance = delivery_queue[i].location.distance
@@ -39,13 +39,25 @@ def find_closest_location(delivery_queue):
         return None
 
 
-# def check_status(current_time, package_list, hub):
-#     packages_by_status = hub.get_packages_by_status(package_list)
-#     if ((get_hours_float('8:35:00') <= current_time <= get_hours_float('9:25:00') and hub.count == 0) or (
-#             get_hours_float('9:35:00') <= current_time <= get_hours_float('10:25:00') and hub.count == 1) or (
-#             get_hours_float('12:03:00') <= current_time <= get_hours_float('13:12:00') and hub.count == 2)):
-#         print('*** {0} Status Check ***'.format(get_formatted_time(current_time)))
-#         hub.count = hub.count + 1
+def check_status(current_time, package_list, hub):
+    print()
+    packages_by_status = hub.get_packages_by_status(package_list)
+    if ((get_hours_float('8:35:00') <= current_time <= get_hours_float('9:25:00') and hub.count == 0) or (
+            get_hours_float('9:35:00') <= current_time <= get_hours_float('10:25:00') and hub.count == 1) or (
+            get_hours_float('12:03:00') <= current_time <= get_hours_float('13:12:00') and hub.count == 2)):
+        print('*** {0} Status Check ***'.format(get_formatted_time(current_time)))
+        print()
+        print('loaded: ', end="")
+        if packages_by_status.read('loaded') is not None:
+            for package in packages_by_status.read('loaded'):
+                print(package.package_id, end=", ")
+        print()
+        print('delivered: ', end="")
+        for package in packages_by_status.read('delivered'):
+            print(package.package_id, end=", ")
+        hub.count = hub.count + 1
+    print()
+    print()
 
 
 def deliver_package(package, time):
@@ -111,37 +123,32 @@ def main():
     truck_2_packages_by_city = hub.get_packages_by_city(truck_2.delivery_queue)
     truck_3_packages_by_city = hub.get_packages_by_city(truck_3.delivery_queue)
 
-
-
     for package in package_list:
-        if package.delivery_address in truck_1_packages_by_address:
+        if truck_1_packages_by_address.read(package.delivery_address) is not None:
             if truck_1.load_on_truck(package):
                 continue
-        if package.delivery_address in truck_2_packages_by_address:
+        if truck_2_packages_by_address.read(package.delivery_address) is not None:
             if truck_2.load_on_truck(package):
                 continue
-        if package.delivery_address in truck_3_packages_by_address:
-            print('address')
+        if truck_3_packages_by_address.read(package.delivery_address) is not None:
             if truck_3.load_on_truck(package):
                 continue
-        if package.delivery_zip in truck_1_packages_by_zip:
+        if truck_1_packages_by_zip.read(package.delivery_zip) is not None:
             if truck_1.load_on_truck(package):
                 continue
-        if package.delivery_zip in truck_2_packages_by_zip:
+        if truck_2_packages_by_zip.read(package.delivery_zip) is not None:
             if truck_2.load_on_truck(package):
                 continue
-        if package.delivery_zip in truck_3_packages_by_zip:
-            print('zip')
+        if truck_3_packages_by_zip.read(package.delivery_zip) is not None:
             if truck_3.load_on_truck(package):
                 continue
-        if package.delivery_city in truck_1_packages_by_city:
+        if truck_1_packages_by_city.read(package.delivery_city) is not None:
             if truck_1.load_on_truck(package):
                 continue
-        if package.delivery_city in truck_2_packages_by_city:
+        if truck_2_packages_by_city.read(package.delivery_city) is not None:
             if truck_2.load_on_truck(package):
                 continue
-        if package.delivery_city in truck_3_packages_by_city:
-            print('city')
+        if truck_3_packages_by_city.read(package.delivery_city) is not None:
             if truck_3.load_on_truck(package):
                 continue
         else:
@@ -150,7 +157,6 @@ def main():
             if truck_2.load_on_truck(package):
                 continue
             if truck_3.load_on_truck(package):
-                print('any')
                 continue
             else:
                 print('Unable to load package on truck')
@@ -172,6 +178,14 @@ def main():
         ShortestPath.dijkstra_shortest_path(distance_graph, last_location)
         if truck.truck_id == 3:
             truck.start_time = min(truck_1.finish_time, truck_2.finish_time)
+            truck.start_time = max(truck.start_time, get_hours_float('10:20:00'))
+            # hub.wrong_address[0].delivery_address = '410 S State St.'
+            # for v in distance_graph.adjacency_list:
+            #     if v.label == hub.wrong_address[0].delivery_address:
+            #         hub.wrong_address[0].location = v
+            # hub.wrong_address[0].delivery_city = 'Salt Lake City'
+            # hub.wrong_address[0].delivery_zip = '84111'
+            # truck_3.load_on_truck(hub.wrong_address[0])
         print('# Truck {0} start: {1}'.format(truck.truck_id, truck.start_time))
         current_time = truck.start_time
 
@@ -183,9 +197,7 @@ def main():
                 deadline_packages.append(package)
 
         current_location = find_closest_location(deadline_packages)
-        print('START_LOOP')
         while len(deadline_packages) > 0:
-            print(len(deadline_packages))
             print('last_total: {0} '.format(hub.total_distance), end='')
             print('+ distance from last: {0} = '.format(current_location.distance), end='')
             hub.total_distance += current_location.distance
@@ -199,16 +211,17 @@ def main():
             print('current_time: ', current_time)
 
             packages_by_address = hub.get_packages_by_address(truck.delivery_queue)
-            for package in packages_by_address[current_location.label]:
-                print(packages_by_address[current_location.label])
+            for package in packages_by_address.read(current_location.label):
                 deliver_package(package, current_time)
                 if package in deadline_packages:
-                    print(deadline_packages)
                     deadline_packages.remove(package)
-                    print(deadline_packages)
+                    # print(deadline_packages)
                 truck.delivery_queue.remove(package)
                 print(package)
                 count += 1
+
+            # Run status check
+            check_status(current_time, original_list, hub)
 
             last_location = current_location
             # Run dijkstras
@@ -218,16 +231,13 @@ def main():
             ShortestPath.dijkstra_shortest_path(distance_graph, current_location)
 
             # Update next location
-            current_location = find_closest_location(truck.delivery_queue)
-            # print('last_location:', last_location.label)
-            # if current_location is not None:
-            #     print('current_location:', current_location.label)
-            # print('running shortest path')
+            current_location = find_closest_location(deadline_packages)
+
+            # Update the truck's path
             truck.paths.append(ShortestPath.get_shortest_path(last_location, current_location))
 
         # first location
         current_location = find_closest_location(truck.delivery_queue)
-        print('STOP')
 
         # Deliveries
         last_location = distance_graph.hub_vertex
@@ -244,19 +254,19 @@ def main():
             print('new_truck_distance: {0}'.format(truck.distance))
             current_time = truck.start_time + (truck.distance / 18)
             print('current_time: ', current_time)
+            print('current_location.label: ', current_location.label)
 
             packages_by_address = hub.get_packages_by_address(truck.delivery_queue)
-            for package in packages_by_address[current_location.label]:
+            for package in packages_by_address.read(current_location.label):
                 deliver_package(package, current_time)
                 truck.delivery_queue.remove(package)
                 print(package)
                 count += 1
 
-            # Update truck's path
-            # print('last_location:', last_location.label)
-            # print('current_location:', current_location.label)
-            # print('running shortest path')
-            # truck.paths.append(ShortestPath.get_shortest_path(last_location, current_location))
+
+
+            # Run status check
+            check_status(current_time, original_list, hub)
 
             last_location = copy.deepcopy(current_location)
             # Run dijkstras
@@ -272,15 +282,18 @@ def main():
             #     print('current_location:', current_location.label)
             # print('running shortest path')
             truck.paths.append(ShortestPath.get_shortest_path(last_location, current_location))
+
         # Return the truck to the hub
         ShortestPath.dijkstra_shortest_path(distance_graph, last_location)
-        # print('The hub vertex distance is {0}, the truck distance is {1}'.format(distance_graph.hub_vertex.distance, truck.distance))
         truck.paths.append(ShortestPath.get_shortest_path(last_location, distance_graph.hub_vertex))
         truck.distance += distance_graph.hub_vertex.distance
         hub.total_distance += distance_graph.hub_vertex.distance
-        # print('The hub vertex distance is {0}, the truck distance is {1}'.format(distance_graph.hub_vertex.distance, truck.distance))
         truck.finish_time = truck.start_time + (truck.distance / 18)
         truck.packages_delivered = count
+
+        # Run status check
+        check_status(truck.finish_time, original_list, hub)
+
         print(truck)
 
     hub.finish_time = max(truck_1.finish_time, truck_2.finish_time, truck_3.finish_time)
