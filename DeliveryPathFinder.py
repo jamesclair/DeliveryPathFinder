@@ -1,7 +1,7 @@
 # James Clair, 000847594
+
 import copy
 import datetime
-
 import LoadData
 import Model
 import ShortestPath
