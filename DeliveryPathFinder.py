@@ -122,44 +122,59 @@ def main():
     truck_1_packages_by_city = hub.get_packages_by_city(truck_1.delivery_queue)
     truck_2_packages_by_city = hub.get_packages_by_city(truck_2.delivery_queue)
     truck_3_packages_by_city = hub.get_packages_by_city(truck_3.delivery_queue)
+    
+    # set starting location
+    starting_location = distance_graph.hub_vertex
+    # calculate shortest path to all points
+    ShortestPath.dijkstra_shortest_path(distance_graph, starting_location)
+    # find out the next closest location
+    current_location = find_closest_location(truck_1.delivery_queue)
+    # TODO: what is the path I took to get there?
+    # TODO: what is that distance?
+    # TODO: how long did it take to get there?
+    # TODO: load all packages that match addresses in that path on to the truck
 
-    for package in package_list:
-        if truck_1_packages_by_address.read(package.delivery_address) is not None:
-            if truck_1.load_on_truck(package):
-                continue
-        if truck_2_packages_by_address.read(package.delivery_address) is not None:
-            if truck_2.load_on_truck(package):
-                continue
-        if truck_3_packages_by_address.read(package.delivery_address) is not None:
-            if truck_3.load_on_truck(package):
-                continue
-        if truck_1_packages_by_zip.read(package.delivery_zip) is not None:
-            if truck_1.load_on_truck(package):
-                continue
-        if truck_2_packages_by_zip.read(package.delivery_zip) is not None:
-            if truck_2.load_on_truck(package):
-                continue
-        if truck_3_packages_by_zip.read(package.delivery_zip) is not None:
-            if truck_3.load_on_truck(package):
-                continue
-        if truck_1_packages_by_city.read(package.delivery_city) is not None:
-            if truck_1.load_on_truck(package):
-                continue
-        if truck_2_packages_by_city.read(package.delivery_city) is not None:
-            if truck_2.load_on_truck(package):
-                continue
-        if truck_3_packages_by_city.read(package.delivery_city) is not None:
-            if truck_3.load_on_truck(package):
-                continue
-        else:
-            if truck_1.load_on_truck(package):
-                continue
-            if truck_2.load_on_truck(package):
-                continue
-            if truck_3.load_on_truck(package):
-                continue
-            else:
-                print('Unable to load package on truck')
+
+
+    for package in packages_by_address.read(current_location.label):
+
+    # for package in package_list:
+    #     if truck_1_packages_by_address.read(package.delivery_address) is not None:
+    #         if truck_1.load_on_truck(package):
+    #             continue
+    #     if truck_2_packages_by_address.read(package.delivery_address) is not None:
+    #         if truck_2.load_on_truck(package):
+    #             continue
+    #     if truck_3_packages_by_address.read(package.delivery_address) is not None:
+    #         if truck_3.load_on_truck(package):
+    #             continue
+    #     if truck_1_packages_by_zip.read(package.delivery_zip) is not None:
+    #         if truck_1.load_on_truck(package):
+    #             continue
+    #     if truck_2_packages_by_zip.read(package.delivery_zip) is not None:
+    #         if truck_2.load_on_truck(package):
+    #             continue
+    #     if truck_3_packages_by_zip.read(package.delivery_zip) is not None:
+    #         if truck_3.load_on_truck(package):
+    #             continue
+    #     if truck_1_packages_by_city.read(package.delivery_city) is not None:
+    #         if truck_1.load_on_truck(package):
+    #             continue
+    #     if truck_2_packages_by_city.read(package.delivery_city) is not None:
+    #         if truck_2.load_on_truck(package):
+    #             continue
+    #     if truck_3_packages_by_city.read(package.delivery_city) is not None:
+    #         if truck_3.load_on_truck(package):
+    #             continue
+    #     else:
+    #         if truck_1.load_on_truck(package):
+    #             continue
+    #         if truck_2.load_on_truck(package):
+    #             continue
+    #         if truck_3.load_on_truck(package):
+    #             continue
+    #         else:
+    #             print('Unable to load package on truck')
 
     for truck in trucks:
         print('#' * 118)
@@ -167,7 +182,7 @@ def main():
         print('# Truck {0} delivery queue length: {1}'.format(truck.truck_id, len(truck.delivery_queue)))
         print('#' * 118)
         for package in truck.delivery_queue:
-            print(package)
+            print(package.package_id)
 
     # Deliver packages
     last_location = distance_graph.hub_vertex
