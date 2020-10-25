@@ -33,6 +33,9 @@ def find_closest_location(delivery_queue):
         if delivery_queue[i].location.distance < closest_distance:
             smallest = i
             closest_distance = delivery_queue[i].location.distance
+    # TODO: Not sure why I should have to check for smallest, but this indicates either there are no packages in the queue
+    # OR the packages locations are unset maybe?
+    # That would mean an unassigned value is not less than float('inf')...
     if smallest is not None:
         return delivery_queue[smallest].location
     else:
