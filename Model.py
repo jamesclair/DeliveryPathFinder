@@ -196,6 +196,9 @@ class Truck:
         self.finish_time = 0
         self.start_time = 0
         self.paths = []
+        self.packages_by_address = PackagePropertyTable(40)
+        self.packages_by_zip = PackagePropertyTable(40)
+        self.packages_by_city = PackagePropertyTable(40)
 
     # TODO: Add 1 driver to two trucks and 1 driver to the other truck
     def __str__(self):

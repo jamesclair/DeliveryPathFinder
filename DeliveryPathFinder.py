@@ -6,13 +6,11 @@ import LoadData
 import Model
 import ShortestPath
 
-
 def get_formatted_time(time):
     hh = int(time)
     mm = (time * 60) % 60
     ss = (time * 3600) % 60
     return "%d:%02d:%02d" % (hh, mm, ss)
-
 
 def get_hours_float(time):
     times = []
@@ -22,7 +20,6 @@ def get_hours_float(time):
 
     time = datetime.time(times[0], times[1], times[2])
     return float(time.hour + time.minute / 60 + time.second / 3600)
-
 
 def find_closest_location(delivery_queue):
     closest_distance = float('inf')
@@ -40,7 +37,6 @@ def find_closest_location(delivery_queue):
         return delivery_queue[smallest].location
     else:
         return None
-
 
 def check_status(current_time, package_list, hub):
     print()
@@ -62,23 +58,25 @@ def check_status(current_time, package_list, hub):
     print()
     print()
 
-
 def deliver_package(package, time):
     package.arrival_time = time
     package.delivery_status = 'delivered'
 
+def get_unloaded_packages_in_path(path, package_list, truck):
+    for location in path:
+        # any package that has not been loaded to be added to current truck
+        # could make this a pre-built map, where packages(values) at a specific location(key) are returned instead
+        for package in package_list:
+            if package.location == location:
+                print("location in package matched: ", location)
+                if truck.load_on_truck(package):
+                    package_list.remove(package)
 
-def main():
-    package_list = LoadData.load_packages()
-    distance_graph = LoadData.load_distances()
+def load(package_list, truck, package):
+    if truck.load_on_truck(package):
+        package_list.remove(package)
 
-    hub = Model.Hub()
-    truck_1 = Model.Truck(1, hub.drivers[0])
-    truck_2 = Model.Truck(2, hub.drivers[1])
-    truck_3 = Model.Truck(3)  # Driver assigned once first truck returns.
-    trucks = [truck_1, truck_2, truck_3]
-
-    # Load packages with special notes
+def load_special_packages(package_list, trucks):
     original_list = package_list.copy()
     for package in original_list:
         if package.special_note != "":
@@ -86,61 +84,89 @@ def main():
             print(note_parts[0])
             if note_parts[0] == "Delayed" or note_parts[0] == "Wrong":
                 package.delayed = True
-                if truck_2.load_on_truck(package):
-                    package_list.remove(package)
+                load(package_list, trucks[1], package)
             elif note_parts[-2] == 'truck':
                 if note_parts[-1] == '1':
-                    if truck_1.load_on_truck(package):
-                        package_list.remove(package)
+                    load(package_list, trucks[0], package)
                 elif note_parts[-1] == '2':
-                    if truck_2.load_on_truck(package):
-                        package_list.remove(package)
+                    load(package_list, trucks[1], package)
                 elif note_parts[-1] == '3':
-                    if truck_3.load_on_truck(package):
-                        package_list.remove(package)
+                    load(package_list, trucks[2], package)
             else:
-                # print(note_parts[0])
                 package.peer_packages.append(note_parts[-2][:-1])
                 package.peer_packages.append(note_parts[-1])
-                if truck_1.load_on_truck(package):
-                    package_list.remove(package)
-                # print('Peer packages for {0} are: '.format(package.delivery_address))
-                # for e in package.peer_packages:
-                # print(e)
+                load(package_list, trucks[0], package)
                 for p2 in package_list:
                     if p2.package_id in package.peer_packages and p2.delivery_status != 'loaded':
-                        if truck_1.load_on_truck(p2):
-                            package_list.remove(p2)
+                        load(package_list, trucks[0], p2)
         else:
             if package.delivery_deadline != 'EOD' and package.delivery_status != 'loaded':
-                if truck_1.load_on_truck(package):
-                    package_list.remove(package)
-    
-    # TODO: this should be iterable
-    truck_1_packages_by_address = hub.get_packages_by_address(truck_1.delivery_queue)
-    truck_2_packages_by_address = hub.get_packages_by_address(truck_2.delivery_queue)
-    truck_3_packages_by_address = hub.get_packages_by_address(truck_3.delivery_queue)
-    truck_1_packages_by_zip = hub.get_packages_by_zip(truck_1.delivery_queue)
-    truck_2_packages_by_zip = hub.get_packages_by_zip(truck_2.delivery_queue)
-    truck_3_packages_by_zip = hub.get_packages_by_zip(truck_3.delivery_queue)
-    truck_1_packages_by_city = hub.get_packages_by_city(truck_1.delivery_queue)
-    truck_2_packages_by_city = hub.get_packages_by_city(truck_2.delivery_queue)
-    truck_3_packages_by_city = hub.get_packages_by_city(truck_3.delivery_queue)
-    
-    # set starting location
-    starting_location = distance_graph.hub_vertex
-    # calculate shortest path to all points
-    # TODO: If I loop over this I will need to reset the graph except for first time
-    ShortestPath.dijkstra_shortest_path(distance_graph, starting_location)
-    # find out the next closest location
-    current_location = find_closest_location(truck_1.delivery_queue)
-    # what is the path I took to get there?
-    # what is that distance?
-    print(ShortestPath.get_shortest_path(starting_location, current_location))
-    # TODO: how long did it take to get there?
-    # TODO: load all packages that match addresses in that path on to the truck
+                load(package_list, trucks[0], package)
+
+def set_truck_start_time(truck):
+    if truck.truck_id == 3:
+        return max(min(truck_1.finish_time, truck_2.finish_time), get_hours_float('10:20:00'))
+    elif truck.truck_id == 2:
+        return get_hours_float('09:05:00')
+    else:
+        return hub.start_time
 
 
+def main():
+    package_list = LoadData.load_packages()
+    distance_graph = LoadData.load_distances()
+
+    hub = Model.Hub()
+    # TODO: create the truck objects in the list and only ever use them in the list:
+    # or maybe this should be an ENUM?
+    trucks = [Model.Truck(1, hub.drivers[0]), Model.Truck(2, hub.drivers[1]), Model.Truck(3)]
+
+    load_special_packages(package_list, trucks)
+    # for truck in trucks:
+    #     truck.packages_by_address = hub.get_packages_by_address(truck.delivery_queue)
+    #     truck.packages_by_zip = hub.get_packages_by_zip(truck.delivery_queue)
+    #     truck.packages_by_city = hub.get_packages_by_city(truck.delivery_queue)
+
+    # group remaining packages
+    hub.get_packages_by_address(package_list)
+    
+    # load remainder of packages while calculating distance/time
+    for truck in trucks:
+        # set starting location
+        starting_location = distance_graph.hub_vertex
+        # calculate shortest path to all points
+        truck.start_time = set_truck_start_time(truck)
+        while len(truck.delivery_queue) > 0:
+            # find out the next closest location
+            ShortestPath.dijkstra_shortest_path(distance_graph, starting_location)
+            current_location = find_closest_location(truck.delivery_queue)
+            # what is the path I took to get there?
+            path = ShortestPath.get_shortest_path(starting_location, current_location)
+            print(path)
+            unloaded_packages_in_path = get_unloaded_packages_in_path(path, package_list, truck)
+            # what is that distance?
+            truck.distance = truck.distance + current_location.distance
+            truck.
+
+            
+            truck.delivery_queue.clear()
+
+            # reset the starting location to current location
+            starting_location = current_location
+ 
+    # how long did it take to get there?
+    # convert time to a time object
+    # time_to_deliver_package = current_location.distance / 18
+    
+    # print("delivery took: ", get_formatted_time(time_to_deliver_package))
+    # # TODO: load all packages that match addresses in that path on to the truck
+    # for location in path:
+    #     if hub.get_packages_by_address.read(location) is not None:
+    #         truck.append(hub.get_packages_by_address.read(location))
+    #         hub.get_packages_by_addres.delete(location)
+
+    # hub.get_packages_by_address(package_list)
+    # if truck.packages_by_address.read(location)
 
     # for package in packages_by_address.read(current_location.label):
 
@@ -283,8 +309,6 @@ def main():
     #             truck.delivery_queue.remove(package)
     #             print(package)
     #             count += 1
-
-
 
     #         # Run status check
     #         check_status(current_time, original_list, hub)
