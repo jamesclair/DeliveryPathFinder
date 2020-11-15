@@ -21,6 +21,7 @@ def get_hours_float(time):
     time = datetime.time(times[0], times[1], times[2])
     return float(time.hour + time.minute / 60 + time.second / 3600)
 
+# Todo: add to truck
 def find_closest_location(delivery_queue):
     closest_distance = float('inf')
     smallest = None
@@ -38,6 +39,7 @@ def find_closest_location(delivery_queue):
     else:
         return None
 
+# Todo: add to package
 def check_status(current_time, package_list, hub):
     print()
     packages_by_status = hub.get_packages_by_status(package_list)
@@ -58,6 +60,7 @@ def check_status(current_time, package_list, hub):
     print()
     print()
 
+# Todo: add to package
 def deliver_package(package, time):
     package.arrival_time = time
     package.delivery_status = 'delivered'
@@ -72,10 +75,12 @@ def get_unloaded_packages_in_path(path, package_list, truck):
                 if truck.load_on_truck(package):
                     package_list.remove(package)
 
+# Todo: add to truck
 def load(package_list, truck, package):
     if truck.load_on_truck(package):
         package_list.remove(package)
 
+# Todo: add to truck
 def load_special_packages(package_list, trucks):
     original_list = package_list.copy()
     for package in original_list:
@@ -103,6 +108,7 @@ def load_special_packages(package_list, trucks):
             if package.delivery_deadline != 'EOD' and package.delivery_status != 'loaded':
                 load(package_list, trucks[0], package)
 
+# Todo: add to truck
 def set_truck_start_time(truck):
     if truck.truck_id == 3:
         return max(min(truck_1.finish_time, truck_2.finish_time), get_hours_float('10:20:00'))
