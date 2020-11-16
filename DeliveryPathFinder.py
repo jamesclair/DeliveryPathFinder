@@ -2,9 +2,8 @@
 
 import copy
 import datetime
-import LoadData
 import Model
-import ShortestPath
+import Modules
 
 def get_formatted_time(time):
     hh = int(time)
@@ -21,28 +20,9 @@ def get_hours_float(time):
     time = datetime.time(times[0], times[1], times[2])
     return float(time.hour + time.minute / 60 + time.second / 3600)
 
-# Todo: add to truck
-def find_closest_location(delivery_queue):
-    closest_distance = float('inf')
-    smallest = None
-    for i in range(0, len(delivery_queue)):
-        print('location:', delivery_queue[i].location.label)
-        print('distance:', delivery_queue[i].location.distance)
-        if delivery_queue[i].location.distance < closest_distance:
-            smallest = i
-            closest_distance = delivery_queue[i].location.distance
-    # TODO: Not sure why I should have to check for smallest, but this indicates either there are no packages in the queue
-    # OR the packages locations are unset maybe?
-    # That would mean an unassigned value is not less than float('inf')...
-    if smallest is not None:
-        return delivery_queue[smallest].location
-    else:
-        return None
-
-# Todo: add to package
-def check_status(current_time, package_list, hub):
+def check_status(current_time, hub):
     print()
-    packages_by_status = hub.get_packages_by_status(package_list)
+    packages_by_status = hub.get_packages_by_status()
     if ((get_hours_float('8:35:00') <= current_time <= get_hours_float('9:25:00') and hub.count == 0) or (
             get_hours_float('9:35:00') <= current_time <= get_hours_float('10:25:00') and hub.count == 1) or (
             get_hours_float('12:03:00') <= current_time <= get_hours_float('13:12:00') and hub.count == 2)):
@@ -60,58 +40,11 @@ def check_status(current_time, package_list, hub):
     print()
     print()
 
-# Todo: add to package
-def deliver_package(package, time):
-    package.arrival_time = time
-    package.delivery_status = 'delivered'
-
-def get_unloaded_packages_in_path(path, package_list, truck):
-    for location in path:
-        # any package that has not been loaded to be added to current truck
-        # could make this a pre-built map, where packages(values) at a specific location(key) are returned instead
-        for package in package_list:
-            if package.location == location:
-                print("location in package matched: ", location)
-                if truck.load_on_truck(package):
-                    package_list.remove(package)
-
 # Todo: add to truck
-def load(package_list, truck, package):
-    if truck.load_on_truck(package):
-        package_list.remove(package)
-
 # Todo: add to truck
-def load_special_packages(package_list, trucks):
-    original_list = package_list.copy()
-    for package in original_list:
-        if package.special_note != "":
-            note_parts = package.special_note.split(' ')
-            print(note_parts[0])
-            if note_parts[0] == "Delayed" or note_parts[0] == "Wrong":
-                package.delayed = True
-                load(package_list, trucks[1], package)
-            elif note_parts[-2] == 'truck':
-                if note_parts[-1] == '1':
-                    load(package_list, trucks[0], package)
-                elif note_parts[-1] == '2':
-                    load(package_list, trucks[1], package)
-                elif note_parts[-1] == '3':
-                    load(package_list, trucks[2], package)
-            else:
-                package.peer_packages.append(note_parts[-2][:-1])
-                package.peer_packages.append(note_parts[-1])
-                load(package_list, trucks[0], package)
-                for p2 in package_list:
-                    if p2.package_id in package.peer_packages and p2.delivery_status != 'loaded':
-                        load(package_list, trucks[0], p2)
-        else:
-            if package.delivery_deadline != 'EOD' and package.delivery_status != 'loaded':
-                load(package_list, trucks[0], package)
-
-# Todo: add to truck
-def set_truck_start_time(truck):
+def set_truck_start_time(truck, hub):
     if truck.truck_id == 3:
-        return max(min(truck_1.finish_time, truck_2.finish_time), get_hours_float('10:20:00'))
+        return max(min(truck[0].finish_time, truck[1].finish_time), get_hours_float('10:20:00'))
     elif truck.truck_id == 2:
         return get_hours_float('09:05:00')
     else:
@@ -119,8 +52,8 @@ def set_truck_start_time(truck):
 
 
 def main():
-    package_list = LoadData.load_packages()
-    distance_graph = LoadData.load_distances()
+    package_list = Modules.LoadData.load_packages()
+    distance_graph = Modules.LoadData.load_distances()
 
     hub = Model.Hub()
     # TODO: create the truck objects in the list and only ever use them in the list:
@@ -141,18 +74,17 @@ def main():
         # set starting location
         starting_location = distance_graph.hub_vertex
         # calculate shortest path to all points
-        truck.start_time = set_truck_start_time(truck)
+        truck.start_time = set_truck_start_time(truck, hub)
         while len(truck.delivery_queue) > 0:
             # find out the next closest location
-            ShortestPath.dijkstra_shortest_path(distance_graph, starting_location)
-            current_location = find_closest_location(truck.delivery_queue)
+            Modules.ShortestPath.dijkstra_shortest_path(distance_graph, starting_location)
+            current_location = truck.find_closest_location()
             # what is the path I took to get there?
-            path = ShortestPath.get_shortest_path(starting_location, current_location)
+            path = Modules.ShortestPath.get_shortest_path(starting_location, current_location)
             print(path)
-            unloaded_packages_in_path = get_unloaded_packages_in_path(path, package_list, truck)
+            truck.load_packages_in_path(path, hub)
             # what is that distance?
             truck.distance = truck.distance + current_location.distance
-            truck.
 
             
             truck.delivery_queue.clear()

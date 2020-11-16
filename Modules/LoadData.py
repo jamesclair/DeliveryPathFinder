@@ -3,7 +3,7 @@ import csv
 
 hub = Model.Hub()
 
-with open('Packages.csv', mode='r') as packages:
+with open('Data/Packages.csv', mode='r') as packages:
     package_list = hub.package_list
     packages_by_address = Model.PackagePropertyTable(27)
     packages_by_deadline = Model.PackagePropertyTable(40)
@@ -22,7 +22,7 @@ with open('Packages.csv', mode='r') as packages:
             package_list[package_id - 1] = package
         count += 1
 
-with open('Distances.csv', mode='r') as distances:
+with open('Data/Distances.csv', mode='r') as distances:
     distance_graph = Model.DistanceGraph()
     distance_reader = csv.reader(distances, delimiter=',')
     count = 0

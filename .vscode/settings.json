@@ -1,0 +1,11 @@
+{
+    "python.autoComplete.extraPaths": [
+        "./Model",
+        "./Modules"
+    ],
+    "python.analysis.extraPaths": [
+        "./Model",
+        "./Modules"
+    ],
+
+}
