@@ -18,7 +18,6 @@ class Truck:
         self.packages_by_zip = PackagePropertyTable(40)
         self.packages_by_city = PackagePropertyTable(40)
 
-    # TODO: Add 1 driver to two trucks and 1 driver to the other truck
     def __str__(self):
         return ('Truck ID: ' + self.truck_id.__str__()
                 + '\nStart Time: ' + self.start_time.__str__()
@@ -43,8 +42,6 @@ class Truck:
             print('Package: ', package.package_id, 'unable to load package. Truck: ', self.truck_id, 'is full.')
             return False
 
-
-    # Todo: add to truck
     def find_closest_location(self):
         closest_distance = float('inf')
         smallest = None
@@ -75,30 +72,3 @@ class Truck:
     def load(self, hub, package):
         if self.load_on_truck(package):
             hub.package_list.remove(package)
-
-    def load_special_packages(package_list, trucks):
-        original_list = package_list.copy()
-        for package in original_list:
-            if package.special_note != "":
-                note_parts = package.special_note.split(' ')
-                print(note_parts[0])
-                if note_parts[0] == "Delayed" or note_parts[0] == "Wrong":
-                    package.delayed = True
-                    trucks[1].load(package_list, package)
-                elif note_parts[-2] == 'truck':
-                    if note_parts[-1] == '1':
-                        trucks[0].load(package_list, package)
-                    elif note_parts[-1] == '2':
-                        trucks[1].load(package_list, package)
-                    elif note_parts[-1] == '3':
-                        trucks[2].load(package_list, package)
-                else:
-                    package.peer_packages.append(note_parts[-2][:-1])
-                    package.peer_packages.append(note_parts[-1])
-                    trucks[0].load(package_list, package)
-                    for p2 in package_list:
-                        if p2.package_id in package.peer_packages and p2.delivery_status != 'loaded':
-                            trucks[0].load(package_list, p2)
-            else:
-                if package.delivery_deadline != 'EOD' and package.delivery_status != 'loaded':
-                    trucks[0].load(package_list, package)
