@@ -2,8 +2,11 @@
 
 import copy
 import datetime
-import Model
-import Modules
+import LoadData
+from Hub import Hub
+from Truck import Truck
+import ShortestPath
+from Package import Package
 
 def get_formatted_time(time):
     hh = int(time)
@@ -42,70 +45,108 @@ def check_status(current_time, hub):
 
 def set_truck_start_time(truck, trucks, hub):
     if truck.truck_id == 3:
-        return max(min(trucks[0].finish_time, trucks[1].finish_time), get_hours_float('10:20:00'))
+        truck.start_time = max(min(trucks[0].finish_time, trucks[1].finish_time), get_hours_float('10:20:00'))
     elif truck.truck_id == 2:
-        return get_hours_float('09:05:00')
+        truck.start_time = get_hours_float('09:05:00')
     else:
-        return hub.start_time
+        truck.start_time = hub.start_time
 
 def load_special_packages(package_list, trucks):
-    original_list = package_list.copy()
-    for package in original_list:
+    for package in package_list:
         if package.special_note != "":
             note_parts = package.special_note.split(' ')
             print(note_parts[0])
             if note_parts[0] == "Delayed" or note_parts[0] == "Wrong":
                 package.delayed = True
-                trucks[1].load(package_list, package)
+                trucks[1].load_on_truck(package)
             elif note_parts[-2] == 'truck':
                 if note_parts[-1] == '1':
-                    trucks[0].load(package_list, package)
+                    trucks[0].load_on_truck(package)
                 elif note_parts[-1] == '2':
-                    trucks[1].load(package_list, package)
+                    trucks[1].load_on_truck(package)
                 elif note_parts[-1] == '3':
-                    trucks[2].load(package_list, package)
+                    trucks[2].load_on_truck(package)
             else:
                 package.peer_packages.append(note_parts[-2][:-1])
                 package.peer_packages.append(note_parts[-1])
-                trucks[0].load(package_list, package)
+                trucks[0].load_on_truck(package)
                 for p2 in package_list:
                     if p2.package_id in package.peer_packages and p2.delivery_status != 'loaded':
-                        trucks[0].load(package_list, p2)
+                        trucks[0].load_on_truck(p2)
         else:
             if package.delivery_deadline != 'EOD' and package.delivery_status != 'loaded':
-                trucks[0].load(package_list, package)
+                trucks[0].load_on_truck(package)
 
 def main():
-    package_list = Modules.LoadData.load_packages()
-    distance_graph = Modules.LoadData.load_distances()
+    package_list = LoadData.load_packages()
+    distance_graph = LoadData.load_distances()
 
-    hub = Model.Hub()
-    trucks = [Model.Truck(1, hub.drivers[0]), Model.Truck(2, hub.drivers[1]), Model.Truck(3)]
+    hub = Hub()
+    trucks = [Truck(1, hub.drivers[0]), Truck(2, hub.drivers[1]), Truck(3)]
     load_special_packages(package_list, trucks)
     
-    # load remainder of packages while calculating distance/time
-    for truck in trucks:
-        starting_location = distance_graph.hub_vertex
-        truck.start_time = set_truck_start_time(truck, trucks, hub)
-        while len(truck.delivery_queue) > 0:
-            # find out the next closest location
-            Modules.ShortestPath.dijkstra_shortest_path(distance_graph, starting_location)
-            current_location = truck.find_closest_location()
-            # what is the path I took to get there?
-            path = Modules.ShortestPath.get_shortest_path(starting_location, current_location)
-            print(path)
-            truck.load_packages_in_path(path, hub)
-            # what is that distance?
-            truck.distance = truck.distance + current_location.distance
-
+    # # load remainder of packages while calculating distance/time
+    # for truck in trucks:
+    #     starting_location = distance_graph.hub_vertex
+    #     set_truck_start_time(truck, trucks, hub)
+    #     truck.finish_time = truck.start_time
+    #     while len(truck.delivery_queue) > 0:
+    #         # find next closest location
+    #         ShortestPath.dijkstra_shortest_path(distance_graph, starting_location)
+    #         current_location = truck.find_closest_location()
+    #         # what is the path I took to get there?
+    #         path = ShortestPath.get_shortest_path(starting_location, current_location)
+    #         truck.load_packages_in_path(package_list, path)
+    #         # update truck distance and time
             
-            truck.delivery_queue.clear()
+    #         truck.distance = truck.distance + current_location.distance
+    #         truck.finish_time = truck.finish_time + (current_location.distance / 18)
 
-            # reset the starting location to current location
-            starting_location = current_location
- 
+    #         packages_by_address = hub.get_packages_by_address(truck.delivery_queue)
+    #         for address in path:
+    #             print(packages_by_address.read(address))
+    #             for package in packages_by_address.read(address):
+    #                 package.deliver_package(truck.finish_time)
+    #                 truck.delivery_queue.remove(package)
+    #         # reset the starting location to current location
+    #         starting_location = current_location
 
+# TODO: write a loop for delivering special packages
+# NOTE: you will likely need to move the "if it's the trucks first iteration to the new loop"
+    while len(package_list) > 0:
+        for truck in trucks:
+            # if it's the trucks first iteration
+            if truck.current_location == None:
+                # set the trucks starting location and start time
+                truck.current_location = distance_graph.hub_vertex
+                if truck.truck_id == 3:
+                    truck.start_time = max(min(trucks[0].finish_time, trucks[1].finish_time), get_hours_float('10:20:00'))
+                elif truck.truck_id == 2:
+                    truck.start_time = get_hours_float('09:05:00')
+                else:
+                    truck.start_time = hub.start_time
 
+            # find the location with the next closest distance
+            ShortestPath.dijkstra_shortest_path(distance_graph, truck.current_location)
+            closest_distance = float('inf')
+            smallest = None
+            for i in range(0, len(package_list)):
+                if package_list[i].location.distance < closest_distance:
+                    smallest = i
+                    closest_distance = package_list[i].location.distance
+            truck.current_location = package_list[smallest].location
+
+            # add all packages in path to truck's delivery queue
+            # remove all loaded packages from package_list
+            # add distance to truck
+            # add time taken to truck
+
+# TODO: calculate truck distances and time and report
+    for package in package_list:
+        if package.distance == None or package.distance > current_location.distance:
+            package.distance = current_location.distance
+            truck.
+        print(package)
 
 if __name__ == "__main__":
     main()

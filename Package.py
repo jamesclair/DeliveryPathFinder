@@ -1,4 +1,4 @@
-import Location
+from Location import Location
 
 class Package:
 
@@ -38,7 +38,6 @@ class Package:
                 + '\n\n'
                 )
 
-def deliver_package(self, time):
-    self.arrival_time = time
-    self.delivery_status = 'delivered'
-
+    def deliver_package(self, time):
+        self.arrival_time = time
+        self.delivery_status = 'delivered'

@@ -1,5 +1,4 @@
-import Location
-
+from Location import Location
 
 class DistanceGraph:
     def __init__(self):

@@ -1,29 +1,33 @@
-import Model
 import csv
+from Hub import Hub
+from Package import Package
+from DistanceGraph import DistanceGraph
+from PackagePropertyTable import PackagePropertyTable
+from Location import Location
 
-hub = Model.Hub()
+hub = Hub()
 
 with open('Data/Packages.csv', mode='r') as packages:
     package_list = hub.package_list
-    packages_by_address = Model.PackagePropertyTable(27)
-    packages_by_deadline = Model.PackagePropertyTable(40)
-    packages_by_city = Model.PackagePropertyTable(40)
-    packages_by_zip = Model.PackagePropertyTable(40)
-    packages_by_weight = Model.PackagePropertyTable(40)
-    packages_by_status = Model.PackagePropertyTable(3)  # hub, in route, delivered
+    packages_by_address = PackagePropertyTable(27)
+    packages_by_deadline = PackagePropertyTable(40)
+    packages_by_city = PackagePropertyTable(40)
+    packages_by_zip = PackagePropertyTable(40)
+    packages_by_weight = PackagePropertyTable(40)
+    packages_by_status = PackagePropertyTable(3)  # hub, in route, delivered
     package_reader = csv.reader(packages, delimiter=',')
     count = 0
     for row in package_reader:
         if count > 0:
             package_id = int(row[0])
-            package = Model.Package(package_id=row[0], package_weight=row[6], special_note=row[7],
+            package = Package(package_id=row[0], package_weight=row[6], special_note=row[7],
                                     delivery_address=row[1], delivery_city=row[2], delivery_zip=row[4],
                                     delivery_deadline=row[5], delivery_state=row[3])
             package_list[package_id - 1] = package
         count += 1
 
 with open('Data/Distances.csv', mode='r') as distances:
-    distance_graph = Model.DistanceGraph()
+    distance_graph = DistanceGraph()
     distance_reader = csv.reader(distances, delimiter=',')
     count = 0
     locations = []
@@ -31,7 +35,7 @@ with open('Data/Distances.csv', mode='r') as distances:
     for row in distance_reader:
         if count > 0:
             address = str(row[1])[1:-8]
-            location = Model.Location(address)
+            location = Location(address)
 
             if location.label == "":
                 location.label = 'hub'

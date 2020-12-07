@@ -1,4 +1,4 @@
-import PackagePropertyTable
+from PackagePropertyTable import PackagePropertyTable
 
 class Hub:
     def __init__(self, capacity=40):

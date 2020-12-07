@@ -19,7 +19,8 @@ class PackagePropertyTable:
         if len(bucket_list) > 0:
             return bucket_list
         else:
-            return None
+            print("No packages found for address, do nothing.")
+            return []
 
     def delete(self, key):
         # key = int(key)
