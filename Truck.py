@@ -11,9 +11,8 @@ class Truck:
         self.packages_delivered = 0
         self.package_count = 0
         self.distance = 0
-        self.finish_time = 0
-        self.start_time = 0
-        self.paths = []
+        self.time = 0
+        self.path = []
         self.packages_by_address = PackagePropertyTable(40)
         self.packages_by_zip = PackagePropertyTable(40)
         self.packages_by_city = PackagePropertyTable(40)
@@ -37,7 +36,7 @@ class Truck:
             package.delivery_status = 'loaded'
             package.truck_id = self.truck_id
             self.package_count += 1
-            print('Package', package.pacage_id, 'loaded on truck', self.truck_id)
+            print('Package', package.package_id, 'loaded on truck', self.truck_id)
             return True
         else:
             print('Package: ', package.package_id, 'unable to load package. Truck: ', self.truck_id, 'is full.')
