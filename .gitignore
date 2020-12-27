@@ -125,3 +125,6 @@ dmypy.json
 
 # intellij
 .idea/
+
+# vim
+.swp
