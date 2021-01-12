@@ -1,5 +1,5 @@
+import Time
 from Location import Location
-
 class Package:
 
     def __init__(self, package_id, package_weight, special_note, delivery_address, delivery_city, delivery_zip,
@@ -32,9 +32,9 @@ class Package:
                 + '\nDelivery Address: ' + self.delivery_address.__str__() + ', ' + self.delivery_city.__str__() + ', '
                                          + self.delivery_state.__str__() + ', ' + self.delivery_zip.__str__()
                 + '\nDelivery Deadline: ' + self.delivery_deadline.__str__()
-                + '\nTime since last delivery: ' + self.delivery_time.__str__()
-                + '\nArrival Time: ' + self.arrival_time.__str__()
+                + '\nArrival Time: ' + Time.get_formatted_time(self.arrival_time)
                 + '\nPeer Packages: ' + self.peer_packages.__str__()
+                + '\nLocation: ' + self.location.label.__str__() + ', Distance: ' + self.location.distance.__str__()
                 + '\n\n'
                 )
 

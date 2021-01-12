@@ -50,12 +50,8 @@ with open('Data/Distances.csv', mode='r') as distances:
                     break
                 else:
                     # print("v.label: ", location.label)
-                    # print("v.distance: ", location.distance)
-                    # print("v.predecessor: ", location.predecessor)
-                    # v = list(distance_graph.adjacency_list.keys())[path - 2]
+                    v = list(distance_graph.adjacency_list.keys())[path - 2]
                     # print("secondV_label: ", v.label)
-                    # print("secondV_distance: ", v.distance)
-                    # print("secondV_predecessor: ", v.predecessor)
                     # print("weight: ", str(float(row[path])))
                     distance_graph.add_undirected_edge(location
                                                        , list(distance_graph.adjacency_list.keys())[path - 2]
@@ -63,9 +59,9 @@ with open('Data/Distances.csv', mode='r') as distances:
 
         count += 1
     # for v in distance_graph.adjacency_list:
-    #     print("v.label: ", v.label)
-    #     print("v.distance: ", v.distance)
-    #     print("v.predecessor: ", v.predecessor)
+        # print("v.label: ", v.label)
+        # print("v.distance: ", v.distance)
+        # print("v.predecessor: ", v.predecessor)
 
 
 def load_packages():

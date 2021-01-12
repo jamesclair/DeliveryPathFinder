@@ -65,15 +65,13 @@ def dijkstra_shortest_path(graph, start_location):
 
 # Start from end_vertex and build the path backwards.
 def get_shortest_path(start_location, end_location):
-    path = []
-    end_location
-    while end_location is not start_location:
-        if end_location is None:
+    path = ''
+    current_location = end_location
+    while current_location is not start_location:
+        if current_location is None:
             break
-        print("destination: ", end_location.label, "destination_predecessor: ", end_location.predecessor, "distance: ", end_location.distance)
-        # path = " -> " + str(end_location.label) + path
-        path.append(end_location.label)
-        end_location = end_location.predecessor
-    path.append(start_location.label)
-    # path = start_location.label + path
+        # print("destination: ", current_location.label, "predecessor: ", current_location.predecessor, "distance: ", current_location.distance)
+        path = " -> " + str(current_location.label) + path
+        current_location = current_location.predecessor
+    path = start_location.label + path
     return path
