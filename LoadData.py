@@ -1,4 +1,5 @@
 import csv
+from pathlib import Path
 from Hub import Hub
 from Package import Package
 from DistanceGraph import DistanceGraph
@@ -7,7 +8,7 @@ from Location import Location
 
 hub = Hub()
 
-with open('Data/Packages.csv', mode='r') as packages:
+with open(Path(__file__).parent/'Data/Packages.csv', mode='r') as packages:
     package_list = hub.package_list
     packages_by_address = PackagePropertyTable(27)
     packages_by_deadline = PackagePropertyTable(40)
@@ -26,7 +27,7 @@ with open('Data/Packages.csv', mode='r') as packages:
             package_list[package_id - 1] = package
         count += 1
 
-with open('Data/Distances.csv', mode='r') as distances:
+with open(Path(__file__).parent/'Data/Distances.csv', mode='r') as distances:
     distance_graph = DistanceGraph()
     distance_reader = csv.reader(distances, delimiter=',')
     count = 0
