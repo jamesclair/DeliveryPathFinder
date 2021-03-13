@@ -11,6 +11,7 @@ class Package:
         self.delivery_city = delivery_city
         self.delivery_zip = delivery_zip
         self.delivery_deadline = delivery_deadline
+        self.priority = False
         self.delivery_state = delivery_state
         self.delivery_time = 0
         self.delivery_status = 'hub'
@@ -23,6 +24,7 @@ class Package:
         self.required_truck = 0
         self.delivery_weight = 0
         self.is_correct = True
+        self.is_special = False
 
     def __str__(self):
         return ('Package Id: ' + self.package_id.__str__()

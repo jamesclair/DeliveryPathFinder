@@ -10,12 +10,12 @@ hub = Hub()
 
 with open(Path(__file__).parent/'Data/Packages.csv', mode='r') as packages:
     package_list = hub.package_list
-    packages_by_address = PackagePropertyTable(27)
-    packages_by_deadline = PackagePropertyTable(40)
-    packages_by_city = PackagePropertyTable(40)
-    packages_by_zip = PackagePropertyTable(40)
-    packages_by_weight = PackagePropertyTable(40)
-    packages_by_status = PackagePropertyTable(3)  # hub, in route, delivered
+    packages_by_address = PackagePropertyTable()
+    packages_by_deadline = PackagePropertyTable()
+    packages_by_city = PackagePropertyTable()
+    packages_by_zip = PackagePropertyTable()
+    packages_by_weight = PackagePropertyTable()
+    packages_by_status = PackagePropertyTable()  # hub, in route, delivered
     package_reader = csv.reader(packages, delimiter=',')
     count = 0
     for row in package_reader:

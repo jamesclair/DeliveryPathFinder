@@ -7,16 +7,18 @@ class Truck:
         self.AVG_MPH = 18
         self.driver = driver
         self.delivery_queue = []
+        self.priority_delivery_queue = []
         self.truck_id = truck_id
         self.packages_delivered = 0
         self.package_count = 0
         self.distance = 0
         self.time = 0
         self.path = []
-        self.packages_by_address = PackagePropertyTable(40)
-        self.packages_by_zip = PackagePropertyTable(40)
-        self.packages_by_city = PackagePropertyTable(40)
+        self.packages_by_address = PackagePropertyTable()
+        self.packages_by_zip = PackagePropertyTable()
+        self.packages_by_city = PackagePropertyTable()
         self.current_location = None
+        self.start_time = 0
 
     def __str__(self):
         return ('Truck ID: ' + self.truck_id.__str__()
@@ -32,11 +34,18 @@ class Truck:
 
     def load_on_truck(self, package):
         if self.package_count < 16:
-            self.delivery_queue.append(package)
             package.delivery_status = 'loaded'
             package.truck_id = self.truck_id
+            if package.priority:
+                self.priority_delivery_queue.append(package)
+                print('    result:', package.package_id, 'PRIORITY - loaded on truck', self.truck_id)
+            elif package.is_special == True:
+                self.delivery_queue.append(package)
+                print('    result:', package.package_id, 'SPECIAL - loaded on truck', self.truck_id)
+            else:
+                print('    result:', package.package_id, 'loaded on truck', self.truck_id)
+                self.delivery_queue.append(package)
             self.package_count += 1
-            print('Package', package.package_id, 'loaded on truck', self.truck_id)
             return True
         else:
             print('Package: ', package.package_id, 'unable to load package. Truck: ', self.truck_id, 'is full.')
