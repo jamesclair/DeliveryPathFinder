@@ -14,9 +14,9 @@ class Truck:
         self.distance = 0
         self.time = 0
         self.path = []
-        self.packages_by_address = PackagePropertyTable()
-        self.packages_by_zip = PackagePropertyTable()
-        self.packages_by_city = PackagePropertyTable()
+        self.packages_by_address = PackagePropertyTable(40)
+        self.packages_by_zip = PackagePropertyTable(40)
+        self.packages_by_city = PackagePropertyTable(40)
         self.current_location = None
         self.start_time = 0
 

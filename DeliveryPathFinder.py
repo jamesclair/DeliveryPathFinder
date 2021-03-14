@@ -97,24 +97,31 @@ def main():
             # find the location with the next closest distance
             closest_distance = float('inf')
             smallest = None
-            # Run-time complexity: O(N)
-            for i in range(0, len(unloaded_packages)):
-                if unloaded_packages[i].location.distance < closest_distance:
-                    smallest = i
-                    closest_distance = unloaded_packages[i].location.distance
 
-            packages_at_stop = packages_by_address.read(unloaded_packages[smallest].location.label)
+            adj_list = distance_graph.adjacency_list[truck.current_location]
+
+            # Run-time complexity: O(N)
+            for i in range(0, len(adj_list)):
+                if adj_list[i].distance < closest_distance and len(packages_by_address.read(adj_list[i].label)) > 0:
+                    smallest = i
+                    closest_distance = adj_list[i].distance
+            # for i in range(0, len(unloaded_packages)):
+            #     if unloaded_packages[i].location.distance < closest_distance:
+            #         smallest = i
+            #         closest_distance = unloaded_packages[i].location.distance
+
+            # load all packages at this address
+            # run-time complexity O(1)
+            packages_at_stop = packages_by_address.read(adj_list[smallest].label)
             if len(packages_at_stop) < (16 - truck.package_count):
                 starting_location = truck.current_location
-                truck.current_location = unloaded_packages[smallest].location
+                truck.current_location = adj_list[smallest]
                 
-                # load all packages at this address
-                # run-time complexity O(1)
                 for package in packages_at_stop:
                     print("Package: ", package.package_id)
-                    if truck.load_on_truck(package):
+                    if package.location.label == truck.current_location.label and truck.load_on_truck(package):
                         loaded_packages.append(package)
-                        unloaded_packages.remove(package)
+                        packages_by_address.delete(package, adj_list[smallest].label)
             else:
                 continue
     print("<------------All packages loaded---------------->\n")
