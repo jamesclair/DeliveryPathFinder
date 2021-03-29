@@ -112,7 +112,7 @@ def main():
                 # run-time complexity O(1)
                 for package in packages_at_stop:
                     print("Package: ", package.package_id)
-                    if truck.load_on_truck(package):
+                    if package.location.label == truck.current_location.label and truck.load_on_truck(package):
                         loaded_packages.append(package)
                         unloaded_packages.remove(package)
             else:
@@ -153,13 +153,14 @@ def main():
             truck.time = truck.start_time + (truck.distance / 18)
             check_status(truck.time, hub, packages)
             truck.path.append(ShortestPath.get_shortest_path(starting_location, truck.current_location))
-            # run-time complexity O(1)
+            # at best run-time complexity O(1) at worst run-time complexity of O(N)
             for package in packages_by_address.read(truck.current_location.label):
-                truck.priority_delivery_queue.remove(package)
-                package.deliver_package(truck.start_time + (truck.distance / 18))
-                package_ids.append(package.package_id)
-                count += 1
-                print(package, "\n")
+                if package.location.label == truck.current_location.label:
+                    truck.priority_delivery_queue.remove(package)
+                    package.deliver_package(truck.start_time + (truck.distance / 18))
+                    package_ids.append(package.package_id)
+                    count += 1
+                    print(package, "\n")
 
         truck.time = truck.start_time + (truck.distance / 18)
         print("<------------Truck: ", truck.truck_id, " PRIORITY packages delivered---------------->\n")
@@ -203,18 +204,20 @@ def main():
             
             # run-time complexity O(1)
             for package in packages_by_address.read(truck.current_location.label):
-                truck.delivery_queue.remove(package)
-                package.deliver_package(truck.time)
-                package_ids.append(package.package_id)
-                count += 1
-                print(package, "\n")
+                if package.location.label == truck.current_location.label:
+                    truck.delivery_queue.remove(package)
+                    package.deliver_package(truck.time)
+                    package_ids.append(package.package_id)
+                    count += 1
+                    print(package, "\n")
 
         truck.time = truck.start_time + (truck.distance / 18)
         print("<------------Truck: ", truck.truck_id, " packages delivered---------------->\n")
 
     # report time finished and distance of each truck and total distance of all trucks
     total_distance = trucks[0].distance + trucks[1].distance + trucks[2].distance
-
+    
+    
     print("<----------------------------FINAL REPORT------------------------------>\n")
     print("Total # of packages delivered: ", count)
     print("Total distance traveled: ", total_distance, "\n")
