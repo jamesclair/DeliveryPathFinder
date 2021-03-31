@@ -59,7 +59,7 @@ Comments were added to each major section of code in the `main()` function in [D
 
 The current solution is designed to allow for data sets of any size.  The main data structure for storing and retrieving packages is a chained hash table defined as the class `PackagePropertyTable`.  A chained hash table allows for each indexed bucket in the table to be a list of any size.  If a table is keyed based on package addresses, was created from a list of 100 packages and all 100 packages shared the same address, then when the table is loaded each package would append to the same bucket list.  When the Getter functions included in the [Hub](Hub.py) are called a new table is declared and initialized with a size of forty.  In order to reduce the number of collisions this size of the table should be equal to or greater than the number of packages that it will be used to store.  The table for size for a package list of one hundred, should be at least one hundred as well.  If a collision does occur the package will still be appended and stored in the bucket list with packages with a different property value.  The semi-unique and much smaller bucket list will be iterated over by the caller, to prune out any undesired packages.
 
-If the number of the packages to be stored in the table increased during the runtime of the program, then the table would require a rehash.  The new package list of increased size could be passed to a modified Getter function that sets the size of the table to the size greater than or equal to the list of packages that was passed in.
+If the number of the packages to be stored in the table increased during the runtime of the program, then the table would require a rehash.  The new package list of increased size could be passed to a modified Getter function that sets the size of the table to the size greater than or equal to the list of packages.
 
 The search performance of the table depends on the uniqueness of the package property data that the table was keyed to and the number of collisions that occur while loading the table.  If the list that is returned contained no collisions in the chained list than the search performance is O(1).  However, if there is one or more collisions in the returned list of packages of N length then they will need iterated over for a total of O(N) comparisons.  This allows the chained hash table to perform the same as searching a list, O(N), in the worst-case, but better than a binary search tree in the best case, O(logN).
 
@@ -127,30 +127,16 @@ The hash table is defined in [PackagePropertyTable.py](PackagePropertyTable.py) 
 The [PackagePropertyTable.py](PackagePropertyTable.py) holds the definition for the `create`, `delete`, and `read` functions are used in the main body to work with the data stored in a hash table.  The `create` function can be used to append packages to an existing bucket list with matching index of the hashed key, or create a new bucket list if the key doesn't exist yet.  The `delete` function allows removal of a bucket list of packages based on the passed key.  And the `read` function is used to quickly search the table for a bucket list of packages with a matching key. 
 ## G. Provide an interface for the user to view the status and info (as listed in part F) of any package at any time, and the total mileage traveled by all trucks. (The delivery status should report the package as at the hub, en route, or delivered. Delivery status must include the time.)
 
-The package object is the interface to describe its current status and time of delivery [Package.py](Package.py).  The Truck object is the interface to describe the status of the truck, and it mileage traveled [Truck.py](Truck.py).  And the methods on the Hub object are the interface used to group and lookup packages in a hash table based on their status at a given time throughout the program: [Hub.py](Hub.py)
+The user is prompted for a time in HH:MM:SS. The program will then return a list of delivered and undelivered packages at the specified time with the properties described in part F.  Three screenshots show this status check at the given times, below.  
 
-- TODO: The submission clearly provides code that runs to completion without errors and shows the total mileage traveled by each truck. An interface that allows the user to enter a time to check the status of a package or all packages at a given time is not readily evident.
-  - ![](img/2021-03-07-16-05-06.png)
-  - command line interface that at a minimum allows user to input any time that
-    - use the timestamp on the package to determine its status
-
-
+In addition, the user is prompted for `Show FINAL REPORT? (y/n):`.  If the user enters `y` the final report is printed, including the total distance traveled by all trucks, the total distance for each truck, and the time each truck finished it's deliveries:
+![](img/2021-03-30-21-57-31.png)
 ### 1.  Provide screenshots to show the status of all packages at a time between 8:35 a.m. and 9:25 a.m.
-![](img/2021-02-27-11-48-21.png)
-
-- TODO: A screenshot for the first status check that shows a list of package Ids that a delivered and not delivered at 8:37 AM is provided. A screenshot with program output to show which truck the packages are loaded on is not readily evident.
-  - ![](img/2021-03-07-16-06-09.png)
-    - Add 
-
+![](img/2021-03-30-21-50-21.png)
 ### 2.  Provide screenshots to show the status of all packages at a time between 9:35 a.m. and 10:25 a.m.
-![](img/2021-02-27-11-48-04.png)
-
-- TODO: A screenshot for the second status check that shows a list of package Ids that a delivered and not delivered at 9:40 AM is provided. A screenshot with program output to show which truck the packages are loaded on is not readily evident.
-  - ![](img/2021-03-07-16-06-51.png)
+![](img/2021-03-30-21-51-19.png)
 ### 3.  Provide screenshots to show the status of all packages at a time between 12:03 p.m. and 1:12 p.m.
-![](img/2021-02-27-11-47-35.png)
-- TODO: A screenshot for the third status check that shows a list of package Ids that a delivered and not delivered at 12:03 AM is provided. A screenshot with program output to show which truck the packages are loaded on is not readily evident.
-  - ![](img/2021-03-07-16-07-19.png)
+![](img/2021-03-30-21-52-29.png)
 
 ## H.  Provide a screenshot or screenshots showing successful completion of the code, free from runtime errors or warnings, that includes the total mileage traveled by all trucks.
 ![](img/2021-02-27-11-49-05.png)
@@ -164,11 +150,10 @@ Done
 ### 3.  Identify two other named algorithms, different from the algorithm implemented in the solution, that would meet the requirements in the scenario.
 A greedy algorithm or binary search tree would have worked.
 #### a.  Describe how each algorithm identified in part I3 is different from the algorithm used in the solution.
-A greedy algorithm would have been better for round trip shortest path because I could have optimized for the final location to be closes to the hub.  Binary Search tree would have been pretty intensive since it would have to be calculated for each point and path.
-- TODO: The submission briefly describes the greedy and binary search tree algorithms. A description that compares the greedy and binary search tree algorithms with the implemented algorithm is not observed.
-  - ![](img/2021-03-07-13-40-35.png)
-  - Talk about how dikjstras is different from geedy and binary search tree algorithms, pros and cons.
 
+Dijkstra's algorithm has some greedy properties because the shortest path to all other vertices from the current vertex is re-calculated and is considered optimal in that moment, however may not be the most optimal for round trip.  A greedy algorithm could be used to find the next closest hop, but may not into account the whole length of the program.  A greedy algorithm would have been better for round trip shortest path because I could have optimized for the final location to be closest to the hub
+
+A Binary Search tree could have been leveraged by storing each location as a node in the tree and searching based off the next smallest distance.  Because each location in a graph when Dijkstra's stores it's predecessor limits storage and search requirements.  To be able to calculate the true shortest path the way Dijkstra's does, a binary search tree would have to be searched at each point and path and the results stored.  This process would have been pretty intensive since it would have to be calculated for each point and path.
 ## J.  Describe what you would do differently, other than the two algorithms identified in I3, if you did this project again.
 I would have iterated over the graph rather than over the packages and then just used the hash tables to look up whether there was a package that needed to be delivered to that location.
 ## K.  Justify the data structure you identified in part D by doing the following:
@@ -176,7 +161,7 @@ I would have iterated over the graph rather than over the packages and then just
 All requirements were individually checked for completeness and correctness.
 
 #### a.  Explain how the time needed to complete the look-up function is affected by changes in the number of packages to be delivered.
-O(N) regardless of size since it is a direct access hash table
+For a chained hash table the run time complexity is O(1) in the best case scenario and O(N) in the worst case scenario.  This means the performance in the worst case scenario is linearly affected by the number of packages.  This would be the case if all packages collided and were stored in a single bucket list.  Requiring the bucket list to be looped over N number of times.
 
 #### b.  Explain how the data structure space usage is affected by changes in the number of packages to be delivered.
 The hash table grows linearly with the uniqueness of the data fed into it.
@@ -184,6 +169,8 @@ The hash table grows linearly with the uniqueness of the data fed into it.
 Lookup would still be O(n) but since cities are unique it would be linear in size.  Trucks wouldn't affect the size since it is the contents of the truck that affects the size not the number of trucks.
 
 ### 2.  Identify two other data structures that could meet the same requirements in the scenario.
-A simple list, or a non-direct access hash table
+A simple list, or a direct access hash table.
 #### a.  Describe how each data structure identified in part K2 is different from the data structure used in the solution.
-A simple list would require iterating over the entire list to find all objects with a matching property and then iterating over the returned list.  Similarly the non-direct hash table could be used to access a smaller subset of objects that can be iterated over to weed out collisions.
+A simple list would require iterating over the entire list to find all objects with a matching property and then iterating over the returned list.  A direct hash table could be used to access an exact matching subset of objects at a hashed index and without any chance for collision giving a complexity of O(1).
+
+

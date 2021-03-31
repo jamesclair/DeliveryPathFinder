@@ -2,7 +2,7 @@ import datetime
 
 def get_formatted_time(time):
     hh = int(time)
-    mm = (time * 60) % 60
+    mm = (time * 60) % 6
     ss = (time * 3600) % 60
     return "%d:%02d:%02d" % (hh, mm, ss)
 

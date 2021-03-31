@@ -30,6 +30,7 @@ def check_status(current_time, hub, packages):
         print('\n*** End of Status check ***\n')
         hub.count = hub.count + 1
 
+
 # Total runtime complexity = O(N) + O(N^3) + O(N^3) + O(N^3) = O(N^3)
 def main():
     packages = LoadData.load_packages()
@@ -217,28 +218,68 @@ def main():
     # report time finished and distance of each truck and total distance of all trucks
     total_distance = trucks[0].distance + trucks[1].distance + trucks[2].distance
     
+    # TODO: An interface that allows the user to enter a time to check the status of a package or all packages at a given time is not readily evident
+    print("<----------------------------STATUS CHECK------------------------------>")
+    print()
+    user_time_fmt = input("To check the delivery status, please enter a time in HH:MM:SS format: ")
+    user_time = Time.get_hours_float(user_time_fmt)
+    delivered_packages = []
+    undelivered_packages = []
+    for package in packages:
+        if package.arrival_time < user_time:
+            delivered_packages.append(package)
+        else:
+            undelivered_packages.append(package)
+
+    print("<-----------Delivered packages, at", user_time_fmt, "---------->")
+    for package in delivered_packages:
+        print(
+            "package_id: ", package.package_id,
+            ", truck: ", package.truck_id,
+            ", status: delivered",
+            ", address: ", package.delivery_address,
+            ", deadline: ", package.delivery_deadline,
+            ", city: ", package.delivery_city,
+            ", zip: ", package.delivery_zip,
+            ", weight: ", package.package_weight
+            )
+    print("\n")
+    print("<-----------Undelivered packages, at", user_time_fmt, "---------->")
+    for package in undelivered_packages:
+        print(
+            "package_id: ", package.package_id,
+            ", truck: ", package.truck_id,
+            ", status: undelivered",
+            ", address: ", package.delivery_address,
+            ", deadline: ", package.delivery_deadline,
+            ", city: ", package.delivery_city,
+            ", zip: ", package.delivery_zip,
+            ", weight: ", package.package_weight
+            )
+    print("\n")
+            
+    final_report = input("Show FINAL REPORT? (y/n): ")
+    if final_report == "y":
+        print("<----------------------------FINAL REPORT------------------------------>\n")
+        print("Total # of packages delivered: ", count)
+        print("Total distance traveled: ", total_distance, "\n")
     
-    print("<----------------------------FINAL REPORT------------------------------>\n")
-    print("Total # of packages delivered: ", count)
-    print("Total distance traveled: ", total_distance, "\n")
-    
-    print("<------------Truck 1---------------->")
-    print("Total distance: ", trucks[0].distance)
-    print("Time Finished: ", Time.get_formatted_time(trucks[0].time), "\n")
-    print(trucks[0].path)
+        print("<------------Truck 1---------------->")
+        print("Total distance: ", trucks[0].distance)
+        print("Time Finished: ", Time.get_formatted_time(trucks[0].time), "\n")
+        print(trucks[0].path)
 
-    print("<------------Truck 2---------------->")
-    print("Total distance: ", trucks[1].distance)
-    print("Time Finished: ", Time.get_formatted_time(trucks[1].time), "\n")
-    print(trucks[1].path)
+        print("<------------Truck 2---------------->")
+        print("Total distance: ", trucks[1].distance)
+        print("Time Finished: ", Time.get_formatted_time(trucks[1].time), "\n")
+        print(trucks[1].path)
 
-    print("<------------Truck 3---------------->")
-    print("Total distance: ", trucks[2].distance)
-    print("Time Finished: ", Time.get_formatted_time(trucks[2].time), "\n")
-    print(trucks[2].path)
-
-    if (hub.count < 3):
-        check_status(Time.get_hours_float('12:03:00'), hub, packages)
+        print("<------------Truck 3---------------->")
+        print("Total distance: ", trucks[2].distance)
+        print("Time Finished: ", Time.get_formatted_time(trucks[2].time), "\n")
+        print(trucks[2].path)
+    else:
+        print("Skipping Final Report")
 
 if __name__ == "__main__":
     main()
