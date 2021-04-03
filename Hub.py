@@ -59,3 +59,10 @@ class Hub:
             if package is not None:
                 packages_by_deadline.create(package.delivery_deadline, package)
         return packages_by_deadline
+
+    def get_packages_by_arrival(self, packages):
+        packages_by_arrival = PackagePropertyTable(40)
+        for package in packages:
+            if package is not None:
+                packages_by_arrival.create(package.arrival_time, package)
+        return packages_by_arrival

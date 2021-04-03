@@ -158,7 +158,7 @@ def main():
             for package in packages_by_address.read(truck.current_location.label):
                 if package.location.label == truck.current_location.label:
                     truck.priority_delivery_queue.remove(package)
-                    package.deliver_package(truck.start_time + (truck.distance / 18))
+                    package.deliver_package(truck.time)
                     package_ids.append(package.package_id)
                     count += 1
                     print(package, "\n")
@@ -241,7 +241,8 @@ def main():
             ", deadline: ", package.delivery_deadline,
             ", city: ", package.delivery_city,
             ", zip: ", package.delivery_zip,
-            ", weight: ", package.package_weight
+            ", weight: ", package.package_weight,
+            ", time delivered: ", Time.get_formatted_time(package.arrival_time)
             )
     print("\n")
     print("<-----------Undelivered packages, at", user_time_fmt, "---------->")
@@ -254,7 +255,9 @@ def main():
             ", deadline: ", package.delivery_deadline,
             ", city: ", package.delivery_city,
             ", zip: ", package.delivery_zip,
-            ", weight: ", package.package_weight
+            ", weight: ", package.package_weight,
+            ", time delivered: ", Time.get_formatted_time(package.arrival_time)
+
             )
     print("\n")
             
