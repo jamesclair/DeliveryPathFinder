@@ -1,8 +1,6 @@
 # DeliveryPathFinder
 
-My algorithm of choice was implementing [Dijkstra shortest path algorithm](./ShortestPath.py).
-
-
+DeliveryPathFinder is an application that I chose to build in for my Data Structures and Algorithms 2 course while attaining my B.S. in CS.  This program provides a shortest path solution for delivering a truck load of packages given their distance from a hub distribution center in Utah.  To solve this my algorithm of choice was implementing [Dijkstra shortest path algorithm](./ShortestPath.py).
 
 ## How It Works
 
@@ -188,7 +186,8 @@ Successful Results:
 - Unit tests
 - Standardizing client inputs and outputs
 - externalize config
-- Look into further optimizations to the Dijkstras Shortest Path and other Graph traversal algorithms.
+- Look into further optimizations to the Dijkstras Shortest Path and other Graph traversal algorithms
+- The code could use a clean up by following the SOLID principals
 
 ## Support
 
